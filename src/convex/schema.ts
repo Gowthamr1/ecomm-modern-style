@@ -16,6 +16,19 @@ export const roleValidator = v.union(
 );
 export type Role = Infer<typeof roleValidator>;
 
+export const orderStatusValidator = v.union(
+  v.literal("paid"),
+  v.literal("shipped"),
+  v.literal("delivered"),
+  v.literal("cancelled"),
+);
+export type OrderStatus = Infer<typeof orderStatusValidator>;
+
+export const paymentStatusValidator = v.union(
+  v.literal("succeeded"),
+  v.literal("refunded"),
+);
+
 const schema = defineSchema(
   {
     // default auth tables using convex auth.
@@ -32,12 +45,73 @@ const schema = defineSchema(
       role: v.optional(roleValidator), // role of the user. do not remove
     }).index("email", ["email"]), // index for the email. do not remove or modify
 
-    // add other tables here
+    products: defineTable({
+      name: v.string(),
+      slug: v.string(),
+      category: v.string(),
+      tagline: v.string(),
+      description: v.string(),
+      /** price in cents */
+      price: v.number(),
+      compareAtPrice: v.optional(v.number()),
+      image: v.string(),
+      material: v.string(),
+      stock: v.number(),
+      rating: v.number(),
+      reviewCount: v.number(),
+      featured: v.boolean(),
+    })
+      .index("by_slug", ["slug"])
+      .index("by_category", ["category"]),
 
-    // tableName: defineTable({
-    //   ...
-    //   // table fields
-    // }).index("by_field", ["field"])
+    orders: defineTable({
+      userId: v.id("users"),
+      number: v.string(),
+      status: orderStatusValidator,
+      items: v.array(
+        v.object({
+          productId: v.id("products"),
+          name: v.string(),
+          slug: v.string(),
+          image: v.string(),
+          price: v.number(),
+          quantity: v.number(),
+        }),
+      ),
+      subtotal: v.number(),
+      shipping: v.number(),
+      tax: v.number(),
+      total: v.number(),
+      shippingAddress: v.object({
+        fullName: v.string(),
+        line1: v.string(),
+        city: v.string(),
+        region: v.string(),
+        postalCode: v.string(),
+        country: v.string(),
+      }),
+      paymentId: v.optional(v.id("payments")),
+      createdAt: v.number(),
+    })
+      .index("by_user", ["userId"])
+      .index("by_status", ["status"])
+      .index("by_number", ["number"]),
+
+    payments: defineTable({
+      userId: v.id("users"),
+      orderId: v.optional(v.id("orders")),
+      reference: v.string(),
+      amount: v.number(),
+      currency: v.string(),
+      method: v.string(),
+      brand: v.string(),
+      last4: v.string(),
+      status: paymentStatusValidator,
+      createdAt: v.number(),
+    })
+      .index("by_user", ["userId"])
+      .index("by_order", ["orderId"])
+      .index("by_reference", ["reference"]),
   },
   {
     schemaValidation: false,

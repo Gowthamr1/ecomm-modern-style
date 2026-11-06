@@ -1,6 +1,8 @@
 import '@vly-ai/integrations';
 import { Toaster } from "@/components/ui/sonner";
 import { RequireAuth } from "@/components/RequireAuth";
+import { RequireRole } from "@/components/RequireRole";
+import { CartProvider } from "@/lib/cart";
 import { VlyToolbar } from "../vly-toolbar-readonly.tsx";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
@@ -12,7 +14,14 @@ import "./index.css";
 // Lazy load route components for better code splitting
 const Landing = lazy(() => import("./pages/Landing.tsx"));
 const AuthPage = lazy(() => import("./pages/Auth.tsx"));
-const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
+const Shop = lazy(() => import("./pages/Shop.tsx"));
+const Product = lazy(() => import("./pages/Product.tsx"));
+const Cart = lazy(() => import("./pages/Cart.tsx"));
+const Checkout = lazy(() => import("./pages/Checkout.tsx"));
+const Orders = lazy(() => import("./pages/Orders.tsx"));
+const Payments = lazy(() => import("./pages/Payments.tsx"));
+const Profile = lazy(() => import("./pages/Profile.tsx"));
+const Admin = lazy(() => import("./pages/Admin.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 // Simple loading fallback for route transitions
@@ -115,28 +124,65 @@ createRoot(document.getElementById("root")!).render(
         <VlyToolbar />
       </ToolbarErrorBoundary>
       <ConvexAuthProvider client={convex}>
-        <BrowserRouter>
-          <RouteSyncer />
-          <Suspense fallback={<RouteLoading />}>
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route
-                path="/auth"
-                element={<AuthPage redirectAfterAuth="/dashboard" />}
-              />
-              <Route
-                path="/dashboard"
-                element={
-                  <RequireAuth>
-                    <Dashboard />
-                  </RequireAuth>
-                }
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-        <Toaster />
+        <CartProvider>
+          <BrowserRouter>
+            <RouteSyncer />
+            <Suspense fallback={<RouteLoading />}>
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/product/:slug" element={<Product />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route
+                  path="/auth"
+                  element={<AuthPage redirectAfterAuth="/shop" />}
+                />
+                <Route
+                  path="/checkout"
+                  element={
+                    <RequireAuth redirectImmediately>
+                      <Checkout />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/orders"
+                  element={
+                    <RequireAuth redirectImmediately>
+                      <Orders />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/payments"
+                  element={
+                    <RequireAuth redirectImmediately>
+                      <Payments />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <RequireAuth redirectImmediately>
+                      <Profile />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <RequireRole role="admin">
+                      <Admin />
+                    </RequireRole>
+                  }
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+          <Toaster />
+        </CartProvider>
       </ConvexAuthProvider>
     </RootErrorBoundary>
   </StrictMode>,
