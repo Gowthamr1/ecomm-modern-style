@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "Forma",
+    "slug": "forma",
+    "scheme": "forma",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#faf8f4",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.forma.store"
+    },
+    "android": {
+      "package": "com.forma.store",
+      "versionCode": 1,
+      "predictiveBackGestureEnabled": false,
+      "adaptiveIcon": {
+        "backgroundColor": "#20382f",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#faf8f4"
+        }
+      ]
+    ],
+    "extra": {
+      "convexUrl": "https://secret-capybara-607.convex.cloud"
+    }
+  }
+}
