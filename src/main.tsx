@@ -1,7 +1,6 @@
 import '@vly-ai/integrations';
 import { Toaster } from "@/components/ui/sonner";
 import { RequireAuth } from "@/components/RequireAuth";
-import { RequireRole } from "@/components/RequireRole";
 import { CartProvider } from "@/lib/cart";
 import { VlyToolbar } from "../vly-toolbar-readonly.tsx";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
@@ -21,7 +20,6 @@ const Checkout = lazy(() => import("./pages/Checkout.tsx"));
 const Orders = lazy(() => import("./pages/Orders.tsx"));
 const Payments = lazy(() => import("./pages/Payments.tsx"));
 const Profile = lazy(() => import("./pages/Profile.tsx"));
-const Admin = lazy(() => import("./pages/Admin.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 // Simple loading fallback for route transitions
@@ -167,14 +165,6 @@ createRoot(document.getElementById("root")!).render(
                     <RequireAuth redirectImmediately>
                       <Profile />
                     </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/admin"
-                  element={
-                    <RequireRole role="admin">
-                      <Admin />
-                    </RequireRole>
                   }
                 />
                 <Route path="*" element={<NotFound />} />

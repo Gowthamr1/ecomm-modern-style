@@ -301,7 +301,7 @@ export default function Product() {
               <Check className="size-3.5 text-primary" />
               {lowStock
                 ? `Only ${product.stock} left — low stock`
-                : "Free shipping on orders over $75"}
+                : "Free shipping on orders over ₹6,250"}
               {!isAuthenticated && (
                 <span className="text-muted-foreground/70">
                   · sign in at checkout
@@ -320,8 +320,8 @@ export default function Product() {
                 </AccordionTrigger>
                 <AccordionContent className="pb-4 text-[13px] leading-6 text-muted-foreground">
                   Orders leave the studio within 48 hours. Standard delivery is
-                  free over $75, otherwise $9 flat. Tracking is emailed as soon
-                  as your parcel is scanned.
+                  free over ₹6,250, otherwise ₹199 flat. Tracking is emailed as
+                  soon as your parcel is scanned.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="returns" className="border-b hairline">
@@ -330,8 +330,8 @@ export default function Product() {
                 </AccordionTrigger>
                 <AccordionContent className="pb-4 text-[13px] leading-6 text-muted-foreground">
                   Thirty days to return anything unused in its original
-                  packaging. Refunds are issued to the original (demo) payment
-                  method by an admin.
+                  packaging. Refunds are processed through the original (demo)
+                  payment method.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="care" className="border-b hairline">

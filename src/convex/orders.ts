@@ -66,7 +66,7 @@ export const checkout = mutation({
       city: args.address.city.trim(),
       region: args.address.region.trim(),
       postalCode: args.address.postalCode.trim(),
-      country: args.address.country.trim() || "United States",
+      country: args.address.country.trim() || "India",
     };
     if (!address.fullName || !address.line1 || !address.city || !address.postalCode) {
       throw new Error("Please complete the shipping address.");
@@ -107,8 +107,9 @@ export const checkout = mutation({
       });
     }
 
-    const shipping = subtotal >= 7500 ? 0 : 900;
-    const tax = Math.round(subtotal * 0.08);
+    // INR amounts are in paise: free over ₹6,250, ₹199 shipping, 18% GST.
+    const shipping = subtotal >= 625000 ? 0 : 19900;
+    const tax = Math.round(subtotal * 0.18);
     const total = subtotal + shipping + tax;
     const createdAt = Date.now();
 
@@ -116,7 +117,7 @@ export const checkout = mutation({
       userId: user._id,
       reference: paymentReference(),
       amount: total,
-      currency: "usd",
+      currency: "inr",
       method: "Demo card",
       brand: args.brand.trim() || "Visa",
       last4: args.last4,

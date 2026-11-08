@@ -9,7 +9,6 @@ const tones: Record<string, { background: string; foreground: string }> = {
   cancelled: { background: colors.dangerSoft, foreground: colors.danger },
   succeeded: { background: colors.pineSoft, foreground: colors.pine },
   refunded: { background: colors.paperDeep, foreground: colors.muted },
-  admin: { background: colors.pine, foreground: colors.paper },
   customer: { background: colors.paperDeep, foreground: colors.muted },
   guest: { background: colors.sand, foreground: colors.pineDeep },
   "in stock": { background: colors.pineSoft, foreground: colors.pine },

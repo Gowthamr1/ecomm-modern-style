@@ -48,7 +48,6 @@ export default function RootLayout() {
             <Stack.Screen name="product/[slug]" options={{ title: "" }} />
             <Stack.Screen name="checkout" options={{ title: "Checkout" }} />
             <Stack.Screen name="payments" options={{ title: "Payments" }} />
-            <Stack.Screen name="admin" options={{ title: "Store admin" }} />
             <Stack.Screen name="auth" options={{ title: "Sign in" }} />
           </Stack>
         </CartProvider>

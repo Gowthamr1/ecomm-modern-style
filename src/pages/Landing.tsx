@@ -104,7 +104,7 @@ export default function Landing() {
                 <span className="block font-medium text-foreground">
                   Free shipping
                 </span>
-                on orders over $75
+                on orders over ₹6,250
               </p>
             </div>
           </motion.div>
@@ -170,7 +170,7 @@ export default function Landing() {
       <section className="border-y hairline bg-card/50">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-center gap-x-10 gap-y-3 px-5 py-4 text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground sm:px-8">
           {[
-            "Free shipping over $75",
+            "Free shipping over ₹6,250",
             "30-day returns",
             "Demo payments only",
             "Small-batch production",
@@ -288,8 +288,8 @@ export default function Landing() {
           {[
             {
               icon: Truck,
-              title: "Free shipping over $75",
-              copy: "Dispatched within 48 hours from Portland, tracked end to end.",
+              title: "Free shipping over ₹6,250",
+              copy: "Dispatched within 48 hours, tracked end to end.",
             },
             {
               icon: RotateCcw,

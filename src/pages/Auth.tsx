@@ -237,8 +237,8 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                   Continue as guest
                 </Button>
                 <p className="mt-3 text-center text-[11px] leading-5 text-muted-foreground">
-                  Guests can browse and buy, then claim the admin role from the
-                  profile page if the store has none.
+                  Guests can browse and buy. Sign in with email to keep your
+                  orders and receipts together.
                 </p>
               </>
             ) : (

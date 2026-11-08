@@ -51,9 +51,13 @@ const schema = defineSchema(
       category: v.string(),
       tagline: v.string(),
       description: v.string(),
-      /** price in cents */
+      /** price in paise (INR) */
       price: v.number(),
       compareAtPrice: v.optional(v.number()),
+      /** internal purchase cost in paise, admin-only */
+      cost: v.optional(v.number()),
+      /** stock level that triggers a reorder alert */
+      reorderLevel: v.optional(v.number()),
       image: v.string(),
       material: v.string(),
       stock: v.number(),

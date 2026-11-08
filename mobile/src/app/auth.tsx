@@ -184,7 +184,7 @@ export default function AuthScreen() {
               <View style={styles.benefits}>
                 <Benefit text="No password, no email needed" />
                 <Benefit text="Demo checkout in under a minute" />
-                <Benefit text="Admin can be claimed once from your profile" />
+                <Benefit text="Your details stay ready for next time" />
               </View>
               <Button
                 label="Continue as guest"

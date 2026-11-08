@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import type { Doc } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import { requireAdmin } from "./lib/roles";
@@ -7,8 +8,9 @@ const photo = (id: string) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=1200&q=80`;
 
 /**
- * Demo catalog for version 1. Seeded once when the products table is empty so
- * the storefront has something to browse on a fresh deployment.
+ * Demo catalog for version 1, priced in paise (INR). Seeded once when the
+ * products table is empty so the storefront has something to browse on a
+ * fresh deployment.
  */
 const DEMO_PRODUCTS = [
   {
@@ -18,8 +20,10 @@ const DEMO_PRODUCTS = [
     tagline: "Quiet, all day",
     description:
       "Over-ear headphones tuned for long listening sessions. Memory-foam cushions, a machined aluminium frame, and adaptive noise cancelling that reads the room around you.",
-    price: 18900,
-    compareAtPrice: 22900,
+    price: 1568700,
+    compareAtPrice: 1900700,
+    cost: 862800,
+    reorderLevel: 6,
     image: photo("photo-1505740420928-5e560c06d30e"),
     material: "Aluminium · memory foam",
     stock: 24,
@@ -34,7 +38,9 @@ const DEMO_PRODUCTS = [
     tagline: "Time, uncomplicated",
     description:
       "A 38mm brushed-steel case with a sandblasted dial and a vegetable-tanned leather strap. Automatic movement, 72-hour reserve, and sapphire glass that shrugs off the day.",
-    price: 24000,
+    price: 1992000,
+    cost: 1095600,
+    reorderLevel: 4,
     image: photo("photo-1523275335684-37898b6baf30"),
     material: "Steel · leather",
     stock: 12,
@@ -49,7 +55,9 @@ const DEMO_PRODUCTS = [
     tagline: "Light where you need it",
     description:
       "A compact task lamp with a folded steel arm and stepless dimming. Warm 2700K light that stays easy on the eyes through the last page of the night.",
-    price: 12800,
+    price: 1062400,
+    cost: 584300,
+    reorderLevel: 5,
     image: photo("photo-1507473885765-e6ed057f782c"),
     material: "Powder-coated steel",
     stock: 18,
@@ -64,7 +72,9 @@ const DEMO_PRODUCTS = [
     tagline: "The one pair you reach for",
     description:
       "A low-profile sneaker in full-grain leather with a cork-blend footbed. Broken-in from the first wear, resolable at the end of a long life.",
-    price: 11000,
+    price: 913000,
+    cost: 502200,
+    reorderLevel: 6,
     image: photo("photo-1542291026-7eec264c27ff"),
     material: "Full-grain leather · cork",
     stock: 30,
@@ -79,7 +89,9 @@ const DEMO_PRODUCTS = [
     tagline: "Everything, in its place",
     description:
       "A 22L daypack in waxed canvas with a padded 16-inch laptop sleeve and a magnetic quick-access lid. Structure without the bulk.",
-    price: 14800,
+    price: 1228400,
+    cost: 675600,
+    reorderLevel: 5,
     image: photo("photo-1553062407-98eeb64c6a62"),
     material: "Waxed canvas · brass",
     stock: 16,
@@ -94,7 +106,9 @@ const DEMO_PRODUCTS = [
     tagline: "A slower morning",
     description:
       "Hand-thrown stoneware dripper and carafe finished in a matte oat glaze. Each piece varies slightly — as it should.",
-    price: 6400,
+    price: 531200,
+    cost: 292200,
+    reorderLevel: 8,
     image: photo("photo-1514228742587-6b1558fcca3d"),
     material: "Stoneware",
     stock: 40,
@@ -109,8 +123,10 @@ const DEMO_PRODUCTS = [
     tagline: "Made for the ordinary",
     description:
       "A fixed 35mm lens and a quiet shutter, built into a magnesium body small enough to keep with you. Manual dials, honest colour, no menus to fight.",
-    price: 42000,
-    compareAtPrice: 48000,
+    price: 3486000,
+    compareAtPrice: 3984000,
+    cost: 1917300,
+    reorderLevel: 3,
     image: photo("photo-1516035069371-29a1b244cc32"),
     material: "Magnesium alloy",
     stock: 6,
@@ -125,7 +141,9 @@ const DEMO_PRODUCTS = [
     tagline: "A place to land",
     description:
       "Solid ash frame with an upholstered linen seat that softens with use. Low, wide, and built for the corner of the room that gets the afternoon light.",
-    price: 56000,
+    price: 4648000,
+    cost: 2556400,
+    reorderLevel: 2,
     image: photo("photo-1567538096630-e0c55bd6374c"),
     material: "Ash · washed linen",
     stock: 3,
@@ -140,7 +158,9 @@ const DEMO_PRODUCTS = [
     tagline: "Type, considered",
     description:
       "A 65% board with lubed tactile switches, an aluminium plate, and a gasket mount that keeps every keystroke low and even. Wired or wireless.",
-    price: 13900,
+    price: 1153700,
+    cost: 634500,
+    reorderLevel: 5,
     image: photo("photo-1587829741301-dc798b83add3"),
     material: "Aluminium · PBT",
     stock: 21,
@@ -155,7 +175,9 @@ const DEMO_PRODUCTS = [
     tagline: "Cold for hours",
     description:
       "Double-walled stainless steel with a leak-proof cap and a powder-coated finish that holds up in a bag. 600ml, no plastic aftertaste.",
-    price: 3800,
+    price: 315400,
+    cost: 173500,
+    reorderLevel: 8,
     image: photo("photo-1602143407151-7111542de6e8"),
     material: "Stainless steel",
     stock: 48,
@@ -172,6 +194,27 @@ export function slugify(value: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 80);
+}
+
+/** Internal cost and reorder thresholds never leave the admin queries. */
+function publicProduct(product: Doc<"products">) {
+  return {
+    _id: product._id,
+    _creationTime: product._creationTime,
+    name: product.name,
+    slug: product.slug,
+    category: product.category,
+    tagline: product.tagline,
+    description: product.description,
+    price: product.price,
+    compareAtPrice: product.compareAtPrice,
+    image: product.image,
+    material: product.material,
+    stock: product.stock,
+    rating: product.rating,
+    reviewCount: product.reviewCount,
+    featured: product.featured,
+  };
 }
 
 async function assertSlugAvailable(
@@ -205,10 +248,12 @@ export const list = query({
   args: {},
   handler: async (ctx) => {
     const products = await ctx.db.query("products").collect();
-    return products.sort((a, b) => {
-      if (a.featured !== b.featured) return a.featured ? -1 : 1;
-      return a.name.localeCompare(b.name);
-    });
+    return products
+      .map(publicProduct)
+      .sort((a, b) => {
+        if (a.featured !== b.featured) return a.featured ? -1 : 1;
+        return a.name.localeCompare(b.name);
+      });
   },
 });
 
@@ -216,17 +261,21 @@ export const featured = query({
   args: {},
   handler: async (ctx) => {
     const products = await ctx.db.query("products").collect();
-    return products.filter((product) => product.featured).slice(0, 4);
+    return products
+      .filter((product) => product.featured)
+      .slice(0, 4)
+      .map(publicProduct);
   },
 });
 
 export const getBySlug = query({
   args: { slug: v.string() },
   handler: async (ctx, { slug }) => {
-    return await ctx.db
+    const product = await ctx.db
       .query("products")
       .withIndex("by_slug", (q) => q.eq("slug", slug))
       .unique();
+    return product ? publicProduct(product) : null;
   },
 });
 
@@ -238,6 +287,8 @@ export const create = mutation({
     description: v.string(),
     price: v.number(),
     compareAtPrice: v.optional(v.number()),
+    cost: v.optional(v.number()),
+    reorderLevel: v.optional(v.number()),
     image: v.string(),
     material: v.string(),
     stock: v.number(),
@@ -249,7 +300,10 @@ export const create = mutation({
     await requireAdmin(ctx);
     const name = args.name.trim();
     if (!name) throw new Error("Product name is required.");
-    if (args.price < 0) throw new Error("Price must be positive.");
+    if (args.price <= 0) throw new Error("Price must be greater than zero.");
+    if (args.cost !== undefined && args.cost < 0) {
+      throw new Error("Cost cannot be negative.");
+    }
     const slug = slugify(name);
     await assertSlugAvailable(ctx, slug);
     return await ctx.db.insert("products", {
@@ -262,6 +316,8 @@ export const create = mutation({
       image: args.image.trim(),
       material: args.material.trim(),
       stock: Math.max(0, Math.round(args.stock)),
+      cost: Math.max(0, Math.round(args.cost ?? args.price * 0.55)),
+      reorderLevel: Math.max(0, Math.round(args.reorderLevel ?? 5)),
       rating: args.rating ?? 4.8,
       reviewCount: args.reviewCount ?? 0,
     });
@@ -277,6 +333,9 @@ export const update = mutation({
     description: v.string(),
     price: v.number(),
     compareAtPrice: v.optional(v.number()),
+    clearCompareAtPrice: v.optional(v.boolean()),
+    cost: v.optional(v.number()),
+    reorderLevel: v.optional(v.number()),
     image: v.string(),
     material: v.string(),
     stock: v.number(),
@@ -288,11 +347,20 @@ export const update = mutation({
     if (!product) throw new Error("Product not found.");
     const name = args.name.trim();
     if (!name) throw new Error("Product name is required.");
+    if (args.price <= 0) throw new Error("Price must be greater than zero.");
+    if (args.cost !== undefined && args.cost < 0) {
+      throw new Error("Cost cannot be negative.");
+    }
     const slug = slugify(name);
     await assertSlugAvailable(ctx, slug, args.productId);
-    const { productId: _id, ...fields } = args;
+    const {
+      productId: _id,
+      clearCompareAtPrice,
+      ...fields
+    } = args;
     await ctx.db.patch(args.productId, {
       ...fields,
+      compareAtPrice: clearCompareAtPrice ? undefined : fields.compareAtPrice,
       name,
       slug,
       tagline: args.tagline.trim(),
@@ -301,6 +369,11 @@ export const update = mutation({
       image: args.image.trim(),
       material: args.material.trim(),
       stock: Math.max(0, Math.round(args.stock)),
+      cost: Math.max(0, Math.round(args.cost ?? product.cost ?? args.price * 0.55)),
+      reorderLevel: Math.max(
+        0,
+        Math.round(args.reorderLevel ?? product.reorderLevel ?? 5),
+      ),
     });
   },
 });

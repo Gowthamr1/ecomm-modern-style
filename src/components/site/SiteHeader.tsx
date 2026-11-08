@@ -20,7 +20,6 @@ import { initials } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import {
   CreditCard,
-  LayoutDashboard,
   LogOut,
   Menu,
   Package,
@@ -57,7 +56,6 @@ export function SiteHeader() {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const isAdmin = user?.role === "admin";
 
   const handleSignOut = async () => {
     await signOut();
@@ -67,7 +65,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40">
       <div className="bg-primary px-4 py-2 text-center text-[10px] font-medium uppercase tracking-[0.22em] text-primary-foreground/90">
-        Demo store · Complimentary shipping over $75 · No real charges
+        Demo store · Complimentary shipping over ₹6,250 · No real charges
       </div>
       <div className="border-b hairline bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-6 px-5 sm:px-8">
@@ -143,14 +141,6 @@ export function SiteHeader() {
                   <DropdownMenuItem onClick={() => navigate("/payments")}>
                     <CreditCard className="mr-2 size-4" /> Payments
                   </DropdownMenuItem>
-                  {isAdmin && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => navigate("/admin")}>
-                        <LayoutDashboard className="mr-2 size-4" /> Admin
-                      </DropdownMenuItem>
-                    </>
-                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={handleSignOut}
@@ -198,15 +188,6 @@ export function SiteHeader() {
                       {item.label}
                     </Link>
                   ))}
-                  {isAdmin && (
-                    <Link
-                      to="/admin"
-                      onClick={() => setMobileOpen(false)}
-                      className="rounded-lg px-3 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-                    >
-                      Admin dashboard
-                    </Link>
-                  )}
                   <div className="my-3 h-px bg-border" />
                   {isAuthenticated ? (
                     <>

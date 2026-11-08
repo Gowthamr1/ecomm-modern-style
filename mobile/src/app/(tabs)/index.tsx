@@ -87,7 +87,7 @@ export default function HomeScreen() {
               style={styles.heroButton}
             />
             <AppText variant="small" color={colors.muted} style={styles.shipNote}>
-              Free shipping over $75
+              Free shipping over ₹6,250
             </AppText>
           </View>
         </View>

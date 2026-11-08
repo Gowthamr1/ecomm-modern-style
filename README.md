@@ -13,9 +13,15 @@ This project uses the following tech stack:
 - Framer Motion (for animations)
 - Three js (for 3d models)
 
-All relevant files live in the 'src' directory.
+All relevant files live in the 'src' directory, except the private Windows admin console which lives in `desktop/`.
 
 Use bun for the package manager.
+
+## Customer store + Windows admin console
+
+The website and Android app are customer-facing and have no admin screens. Store administration happens in the Python desktop console in `desktop/` — product CRUD, stock and reorder levels, orders/refunds, and 30/90/365-day revenue, margin and product-performance graphs. Prices, costs and checkout totals are in INR (stored as paise).
+
+See [`desktop/README.md`](desktop/README.md) for running it and building the Windows executable with PyInstaller.
 
 ## Setup
 

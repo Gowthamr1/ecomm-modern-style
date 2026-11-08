@@ -64,7 +64,7 @@ export default function Checkout() {
   const [city, setCity] = useState("");
   const [region, setRegion] = useState("");
   const [postalCode, setPostalCode] = useState("");
-  const [country, setCountry] = useState("United States");
+  const [country, setCountry] = useState("India");
   const [cardName, setCardName] = useState(user?.name ?? "");
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
@@ -260,7 +260,7 @@ export default function Checkout() {
                   <Input
                     value={line1}
                     onChange={(event) => setLine1(event.target.value)}
-                    placeholder="118 NW Couch St, Apt 4"
+                    placeholder="14 Linking Road, Apt 4"
                     autoComplete="address-line1"
                     className={inputClass}
                     required
@@ -270,7 +270,7 @@ export default function Checkout() {
                   <Input
                     value={city}
                     onChange={(event) => setCity(event.target.value)}
-                    placeholder="Portland"
+                    placeholder="Mumbai"
                     autoComplete="address-level2"
                     className={inputClass}
                     required
@@ -280,7 +280,7 @@ export default function Checkout() {
                   <Input
                     value={region}
                     onChange={(event) => setRegion(event.target.value)}
-                    placeholder="OR"
+                    placeholder="MH"
                     autoComplete="address-level1"
                     className={inputClass}
                   />
@@ -289,7 +289,7 @@ export default function Checkout() {
                   <Input
                     value={postalCode}
                     onChange={(event) => setPostalCode(event.target.value)}
-                    placeholder="97209"
+                    placeholder="400050"
                     autoComplete="postal-code"
                     className={inputClass}
                     required

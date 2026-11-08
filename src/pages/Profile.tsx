@@ -13,8 +13,6 @@ import {
   Loader2,
   LogOut,
   Package,
-  ShieldCheck,
-  Sparkles,
   UserRound,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -26,23 +24,18 @@ export default function Profile() {
   const navigate = useNavigate();
   const orders = useQuery(api.orders.listMine);
   const payments = useQuery(api.payments.listMine);
-  const adminExists = useQuery(api.profile.adminExists);
   const updateProfile = useMutation(api.profile.updateProfile);
-  const claimAdmin = useMutation(api.profile.claimAdmin);
 
   const [name, setName] = useState(user?.name ?? "");
   const [isSaving, setIsSaving] = useState(false);
-  const [isClaiming, setIsClaiming] = useState(false);
 
   useEffect(() => {
     setName(user?.name ?? "");
   }, [user?.name]);
 
-  const isAdmin = user?.role === "admin";
   const spent = (orders ?? [])
     .filter((order) => order.status !== "cancelled")
     .reduce((sum, order) => sum + order.total, 0);
-  const canClaimAdmin = adminExists === false && !isAdmin;
 
   const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -56,23 +49,6 @@ export default function Profile() {
       );
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const handleClaimAdmin = async () => {
-    setIsClaiming(true);
-    try {
-      await claimAdmin();
-      toast.success("You're the store admin", {
-        description: "Product management and order tools are now unlocked.",
-      });
-      navigate("/admin");
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Could not claim admin",
-      );
-    } finally {
-      setIsClaiming(false);
     }
   };
 
@@ -113,19 +89,9 @@ export default function Profile() {
               </div>
               <div className="flex items-center gap-2 pb-1">
                 <StatusBadge
-                  status={isAdmin ? "admin" : "customer"}
-                  className={
-                    isAdmin
-                      ? "bg-primary/10 text-primary ring-primary/15"
-                      : "bg-sand text-primary ring-primary/10"
-                  }
+                  status={user?.isAnonymous ? "guest" : "customer"}
+                  className="bg-sand text-primary ring-primary/10"
                 />
-                {user?.isAnonymous && (
-                  <StatusBadge
-                    status="guest"
-                    className="bg-muted text-muted-foreground ring-border"
-                  />
-                )}
               </div>
             </div>
 
@@ -167,37 +133,6 @@ export default function Profile() {
             </dl>
           </div>
         </div>
-
-        {/* Admin claim */}
-        {canClaimAdmin && (
-          <div className="mt-4 flex flex-col gap-4 rounded-2xl border border-primary/20 bg-primary/[0.04] p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3">
-              <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-sand text-primary">
-                <Sparkles className="size-4" />
-              </span>
-              <div>
-                <p className="text-sm font-medium">This store has no admin yet</p>
-                <p className="mt-1 max-w-md text-[12px] leading-5 text-muted-foreground">
-                  Claim the admin role to manage the catalog, fulfil orders and
-                  issue demo refunds. Only available once, before any admin
-                  exists.
-                </p>
-              </div>
-            </div>
-            <Button
-              onClick={handleClaimAdmin}
-              disabled={isClaiming}
-              className="shrink-0 rounded-full"
-            >
-              {isClaiming ? (
-                <Loader2 className="mr-2 size-4 animate-spin" />
-              ) : (
-                <ShieldCheck className="mr-2 size-4" />
-              )}
-              Claim admin
-            </Button>
-          </div>
-        )}
 
         <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
           {/* Name form */}
@@ -249,15 +184,6 @@ export default function Profile() {
               {[
                 { to: "/orders", icon: Package, label: "Your orders" },
                 { to: "/payments", icon: CreditCard, label: "Payment receipts" },
-                ...(isAdmin
-                  ? [
-                      {
-                        to: "/admin",
-                        icon: ShieldCheck,
-                        label: "Admin dashboard",
-                      },
-                    ]
-                  : []),
               ].map((item) => (
                 <Link
                   key={item.to}

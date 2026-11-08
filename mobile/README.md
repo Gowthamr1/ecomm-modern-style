@@ -38,15 +38,14 @@ Sign-in uses the same Convex Auth deployment as the web app:
 
 - **Guest** creates an anonymous session stored in Android SecureStore.
 - **Email** sends a six-digit code through the same gateway as the web app.
-- The **first account to claim admin** in Profile unlocks the admin dashboard. Admin checks run server-side too.
+- The app is customer-facing only. Store admin tools live in the Python desktop console in `../desktop`, and admin checks run server-side.
 
 ## What's included
 
 - Home edit with featured products and categories
 - Searchable, filterable shop and product detail pages
-- Persisted bag with quantity controls and free-shipping progress
+- INR pricing and a persisted bag with free-shipping progress
 - Demo checkout with shipping address and test card (4242 4242 4242 4242)
 - Order history, payment receipts, profile editing, guest/email auth
-- Mobile admin: order status, cancellation/refund, payment refunds and stock adjustment
 
-Full product creation/editing is still done in the web admin. Card payments are demo-only; no processor is connected.
+Store management happens in the Python desktop inventory console in `../desktop`. Card payments are demo-only; no processor is connected.

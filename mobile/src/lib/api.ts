@@ -88,26 +88,6 @@ export type Order = {
 
 export type OrderWithPayment = Order & { payment: Payment | null };
 
-export type Customer = { name?: string; email?: string } | null;
-
-export type AdminOrder = OrderWithPayment & { customer: Customer };
-
-export type AdminPayment = Payment & { customer: Customer };
-
-export type ProductUpdateArgs = {
-  productId: string;
-  name: string;
-  category: string;
-  tagline: string;
-  description: string;
-  price: number;
-  compareAtPrice?: number;
-  image: string;
-  material: string;
-  stock: number;
-  featured: boolean;
-};
-
 export type CheckoutArgs = {
   items: { productId: string; quantity: number }[];
   cardName: string;
@@ -135,28 +115,18 @@ type MobileApi = {
     currentUser: Query<Record<string, never>, User | null>;
   };
   profile: {
-    adminExists: Query<Record<string, never>, boolean>;
-    claimAdmin: Mutation<Record<string, never>, { role: "admin" }>;
     updateProfile: Mutation<{ name: string }, null>;
   };
   products: {
     list: Query<Record<string, never>, Product[]>;
     seedDemoCatalog: Mutation<Record<string, never>, { seeded: number }>;
-    update: Mutation<ProductUpdateArgs, null>;
   };
   orders: {
     listMine: Query<Record<string, never>, OrderWithPayment[]>;
-    listAll: Query<Record<string, never>, AdminOrder[]>;
     checkout: Mutation<CheckoutArgs, { orderId: string; number: string; total: number }>;
-    updateStatus: Mutation<
-      { orderId: string; status: OrderStatus },
-      null
-    >;
   };
   payments: {
     listMine: Query<Record<string, never>, Payment[]>;
-    listAll: Query<Record<string, never>, AdminPayment[]>;
-    refund: Mutation<{ paymentId: string }, null>;
   };
 };
 

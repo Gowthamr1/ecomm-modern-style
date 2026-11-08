@@ -24,7 +24,7 @@ export function SiteFooter() {
             <Brand />
             <p className="mt-4 text-sm leading-6 text-muted-foreground">
               Considered everyday objects, made to be used rather than
-              displayed. Designed in small batches, shipped from Portland.
+              displayed. Designed in small batches, shipped across India.
             </p>
             <p className="mt-6 inline-flex items-center gap-2 rounded-full border hairline px-3 py-1.5 text-[11px] text-muted-foreground">
               <span className="size-1.5 rounded-full bg-primary" />
@@ -73,7 +73,7 @@ export function SiteFooter() {
               <li>Shipping &amp; returns</li>
               <li>Care guide</li>
               <li>hello@forma.demo</li>
-              <li>Mon–Fri, 9–5 PT</li>
+              <li>Mon–Fri, 9–5 IST</li>
             </ul>
           </div>
         </div>

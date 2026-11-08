@@ -1,11 +1,11 @@
-export function formatMoney(cents: number): string {
-  const value = cents / 100;
-  const hasCents = Math.round(cents) % 100 !== 0;
-  return new Intl.NumberFormat("en-US", {
+export function formatMoney(paise: number): string {
+  const value = paise / 100;
+  const hasPaise = Math.round(paise) % 100 !== 0;
+  return new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: "USD",
-    minimumFractionDigits: hasCents ? 2 : 0,
-    maximumFractionDigits: hasCents ? 2 : 0,
+    currency: "INR",
+    minimumFractionDigits: hasPaise ? 2 : 0,
+    maximumFractionDigits: hasPaise ? 2 : 0,
   }).format(value);
 }
 
@@ -25,9 +25,9 @@ export function initials(value?: string | null): string {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-export const FREE_SHIPPING_THRESHOLD = 7500;
-export const SHIPPING_FEE = 900;
-export const TAX_RATE = 0.08;
+export const FREE_SHIPPING_THRESHOLD = 625000;
+export const SHIPPING_FEE = 19900;
+export const TAX_RATE = 0.18;
 
 export function orderSummary(subtotal: number) {
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;

@@ -183,7 +183,7 @@ export default function ProductScreen() {
           <View style={styles.serviceRow}>
             <Service
               icon={<PackageCheck size={16} color={colors.pine} strokeWidth={1.6} />}
-              text="Free shipping over $75"
+              text="Free shipping over ₹6,250"
             />
             <Service
               icon={<RotateCcw size={16} color={colors.pine} strokeWidth={1.6} />}
@@ -245,8 +245,8 @@ export default function ProductScreen() {
             </AppText>
             <AppText variant="small" color={colors.inkSoft} style={styles.shippingCopy}>
               Orders leave the studio within two working days. Shipping is free
-              over $75, otherwise a flat $9. Returns are accepted within 30 days
-              in original condition.
+              over ₹6,250, otherwise ₹199 flat. Returns are accepted within 30
+              days in original condition.
             </AppText>
           </View>
         </View>

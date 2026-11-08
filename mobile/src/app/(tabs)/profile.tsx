@@ -5,8 +5,6 @@ import {
   CreditCard,
   LogOut,
   Package,
-  ShieldCheck,
-  Sparkles,
 } from "lucide-react-native";
 import { useEffect, useState, type ReactNode } from "react";
 import {
@@ -75,32 +73,23 @@ function SignedInProfile({ user }: { user: User }) {
   const { signOut } = useAuth();
   const orders = useQuery(api.orders.listMine);
   const payments = useQuery(api.payments.listMine);
-  const adminExists = useQuery(api.profile.adminExists);
   const updateProfile = useMutation(api.profile.updateProfile);
-  const claimAdmin = useMutation(api.profile.claimAdmin);
 
   const [name, setName] = useState(user.name ?? "");
   const [saving, setSaving] = useState(false);
   const [saveNote, setSaveNote] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [claiming, setClaiming] = useState(false);
-  const [claimError, setClaimError] = useState<string | null>(null);
   const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     if (user.name) setName(user.name);
   }, [user.name]);
 
-  const isAdmin = user.role === "admin";
   const spent = (payments ?? [])
     .filter((payment) => payment.status === "succeeded")
     .reduce((sum, payment) => sum + payment.amount, 0);
   const orderCount = orders?.length ?? 0;
-  const roleLabel = isAdmin
-    ? "admin"
-    : user.isAnonymous
-      ? "guest"
-      : "customer";
+  const roleLabel = user.isAnonymous ? "guest" : "customer";
 
   async function saveName() {
     setSaveError(null);
@@ -120,22 +109,6 @@ function SignedInProfile({ user }: { user: User }) {
       );
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function handleClaimAdmin() {
-    setClaimError(null);
-    setClaiming(true);
-    try {
-      await claimAdmin({});
-    } catch (cause) {
-      setClaimError(
-        cause instanceof Error
-          ? cause.message
-          : "Could not claim the admin role.",
-      );
-    } finally {
-      setClaiming(false);
     }
   }
 
@@ -207,33 +180,6 @@ function SignedInProfile({ user }: { user: User }) {
           />
         </View>
 
-        {!isAdmin && adminExists === false ? (
-          <View style={styles.claim}>
-            <View style={styles.claimHead}>
-              <View style={styles.claimIcon}>
-                <ShieldCheck size={18} color={colors.pine} strokeWidth={1.7} />
-              </View>
-              <View style={styles.claimCopy}>
-                <AppText variant="title">Claim the admin role</AppText>
-                <AppText variant="small" color={colors.inkSoft} style={styles.claimBody}>
-                  This demo store has no admin yet. Claim it once to unlock
-                  order management, inventory and refunds on this account.
-                </AppText>
-              </View>
-            </View>
-            {claimError ? <Notice message={claimError} /> : null}
-            <Button
-              label="Claim admin"
-              variant="secondary"
-              size="sm"
-              loading={claiming}
-              onPress={handleClaimAdmin}
-              style={styles.claimButton}
-              icon={<Sparkles size={14} color={colors.ink} strokeWidth={1.8} />}
-            />
-          </View>
-        ) : null}
-
         <View style={styles.actions}>
           <ActionRow
             icon={<Package size={18} color={colors.pine} strokeWidth={1.7} />}
@@ -251,14 +197,6 @@ function SignedInProfile({ user }: { user: User }) {
             note="Receipts & refunds"
             onPress={() => router.push("/payments")}
           />
-          {isAdmin ? (
-            <ActionRow
-              icon={<ShieldCheck size={18} color={colors.pine} strokeWidth={1.7} />}
-              label="Store admin"
-              note="Orders, stock & refunds"
-              onPress={() => router.push("/admin")}
-            />
-          ) : null}
         </View>
 
         <View style={styles.editCard}>
@@ -455,37 +393,6 @@ const styles = StyleSheet.create({
   statValue: {
     fontFamily: fonts.semibold,
     fontSize: 15,
-  },
-  claim: {
-    marginHorizontal: 20,
-    marginTop: 16,
-    padding: 17,
-    borderRadius: radius.lg,
-    backgroundColor: colors.sand,
-    gap: 12,
-  },
-  claimHead: {
-    flexDirection: "row",
-    gap: 11,
-  },
-  claimIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: "rgba(255,253,248,0.7)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  claimCopy: {
-    flex: 1,
-    gap: 3,
-  },
-  claimBody: {
-    lineHeight: 18,
-  },
-  claimButton: {
-    alignSelf: "flex-start",
-    backgroundColor: colors.card,
   },
   actions: {
     marginHorizontal: 20,
