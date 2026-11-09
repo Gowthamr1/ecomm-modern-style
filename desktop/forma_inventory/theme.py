@@ -107,6 +107,15 @@ def configure_ttk(root: tk.Misc) -> None:
         relief="flat",
         width=10,
     )
+    style.configure(
+        "Forma.Horizontal.TScrollbar",
+        background=SAND,
+        troughcolor=CARD,
+        bordercolor=CARD,
+        arrowcolor=MUTED,
+        relief="flat",
+        width=10,
+    )
 
 
 def truncate(value: str, length: int) -> str:

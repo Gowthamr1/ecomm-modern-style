@@ -46,7 +46,7 @@ def build_customers(
             key,
             {
                 "key": key,
-                "name": name or email or "Guest",
+                "name": name or (email.split("@", 1)[0] if email else "Guest"),
                 "email": email,
                 "orders": 0,
                 "cancelled": 0,

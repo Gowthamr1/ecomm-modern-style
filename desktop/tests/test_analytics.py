@@ -132,6 +132,43 @@ class AnalyticsTests(unittest.TestCase):
         self.assertEqual(data["top_products"], [])
         self.assertTrue(data["insights"])
 
+    def test_loss_making_product_is_not_reported_as_zero_profit(self) -> None:
+        product = {
+            "_id": "p3",
+            "name": "Clearance Lamp",
+            "category": "Home",
+            "price": 10_000,
+            "cost": 20_000,
+            "stock": 5,
+            "reorderLevel": 2,
+            "featured": False,
+        }
+        order = {
+            "_id": "o4",
+            "number": "FRM-4",
+            "status": "paid",
+            "createdAt": NOW - DAY,
+            "total": 10_000,
+            "items": [
+                {
+                    "productId": "p3",
+                    "name": "Clearance Lamp",
+                    "price": 10_000,
+                    "quantity": 1,
+                }
+            ],
+            "customer": {"name": "Asha"},
+            "payment": {"status": "succeeded"},
+        }
+        data = build_analytics(
+            {"products": [product], "orders": [order], "payments": []},
+            days=30,
+            now_ms=NOW,
+        )
+        self.assertEqual(data["kpis"]["gross_profit"], -10_000)
+        self.assertEqual(data["kpis"]["margin_pct"], -100.0)
+        self.assertEqual(data["performance"][0]["recommendation"], "Thin margin")
+
     def test_product_payload_preserves_optional_compare_price(self) -> None:
         payload = product_payload(PRODUCTS[0])
         self.assertEqual(payload["price"], 100_000)

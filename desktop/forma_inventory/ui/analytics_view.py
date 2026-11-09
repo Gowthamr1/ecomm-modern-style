@@ -51,6 +51,7 @@ class AnalyticsPage(Page):
             width=260,
         )
         self.range.grid(row=0, column=1, rowspan=3, sticky="e")
+        self.range.set("30 days")
 
         kpis = ctk.CTkFrame(self, fg_color="transparent")
         kpis.pack(fill="x", padx=30, pady=(18, 0))
@@ -69,7 +70,7 @@ class AnalyticsPage(Page):
         trend_card.pack(fill="x", padx=30, pady=(14, 0))
         head = ctk.CTkFrame(trend_card, fg_color="transparent")
         head.pack(fill="x", padx=18, pady=(16, 0))
-        body(head, "Revenue & orders", size=13, weight="bold").pack(side="left")
+        body(head, "Revenue trend", size=13, weight="bold").pack(side="left")
         self.trend_note = muted(head, "", size=9)
         self.trend_note.pack(side="right")
         self.revenue_chart = LineChart(trend_card, height=250)
@@ -245,7 +246,7 @@ class AnalyticsPage(Page):
                 font=font(10),
                 anchor="w",
                 justify="left",
-                wraplength=880,
+                wraplength=640,
             ).pack(side="left", fill="x", expand=True)
 
         rows = []

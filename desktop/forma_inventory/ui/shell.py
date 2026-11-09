@@ -144,7 +144,7 @@ class ShellView(ctk.CTkFrame):
         copy.pack(side="left", fill="x", expand=True, padx=(8, 0))
         ctk.CTkLabel(
             copy,
-            text=self.session.display_name,
+            text=theme.truncate(self.session.display_name, 22),
             text_color=theme.PAPER,
             font=font(9, "bold"),
             anchor="w",
@@ -280,7 +280,7 @@ class ShellView(ctk.CTkFrame):
 
     # ------------------------------------------------------------------ data
     def refresh(self) -> None:
-        if self._refreshing:
+        if not self.winfo_exists() or self._refreshing:
             return
         self._refreshing = True
         self.refresh_button.configure(state="disabled", text="Loading…")
@@ -319,6 +319,7 @@ class ShellView(ctk.CTkFrame):
                 self.refresh_state.configure(
                     text=f"Offline — {_short(error)}", text_color=theme.RED
                 )
+                self._schedule_auto_refresh()
 
         self.app.run_async(self.session.snapshot, on_success=done, on_error=failed)
 

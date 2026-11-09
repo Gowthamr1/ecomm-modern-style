@@ -3,11 +3,12 @@ from __future__ import annotations
 import base64
 import binascii
 import json
+import threading
 import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any
 
 from . import config
 
@@ -66,7 +67,9 @@ class AdminSession:
     email: str
     tokens: SessionTokens
     user: dict[str, Any]
-    _refresh_lock: Callable[[], None] | None = None
+    _refresh_lock: threading.Lock = field(
+        default_factory=threading.Lock, repr=False, compare=False
+    )
     last_user: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
@@ -105,11 +108,15 @@ class AdminSession:
         return exp is None or exp > time.time() + 90
 
     def refresh(self) -> None:
-        result = self.client.refresh(self.tokens.refresh_token)
-        tokens = result.get("tokens") if isinstance(result, dict) else None
-        if not tokens or not tokens.get("token") or not tokens.get("refreshToken"):
-            raise ConvexError("Your admin session expired. Please sign in again.")
-        self.tokens = SessionTokens(tokens["token"], tokens["refreshToken"])
+        # Auto-refresh and a user action can both hit an expired token at the
+        # same time. Serialize the refresh so a rotated refresh token is never
+        # consumed twice.
+        with self._refresh_lock:
+            result = self.client.refresh(self.tokens.refresh_token)
+            tokens = result.get("tokens") if isinstance(result, dict) else None
+            if not tokens or not tokens.get("token") or not tokens.get("refreshToken"):
+                raise ConvexError("Your admin session expired. Please sign in again.")
+            self.tokens = SessionTokens(tokens["token"], tokens["refreshToken"])
 
     def call(
         self,

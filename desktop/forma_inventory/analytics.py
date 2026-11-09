@@ -138,7 +138,7 @@ def _aggregate(
             product = products_by_id.get(str(item.get("productId")))
             cost = _product_cost(product, price)
             line_revenue = price * quantity
-            line_profit = max(0, price - cost) * quantity
+            line_profit = (price - cost) * quantity
             units += quantity
             cogs += cost * quantity
             stats = product_stats[product_id]

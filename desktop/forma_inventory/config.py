@@ -28,9 +28,10 @@ def resource_path(relative: str) -> Path:
 def load_config() -> dict[str, Any]:
     path = app_data_dir() / "config.json"
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return {}
+    return data if isinstance(data, dict) else {}
 
 
 def save_config(config: dict[str, Any]) -> None:

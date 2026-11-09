@@ -165,6 +165,9 @@ class CustomersPage(Page):
                 }
             )
         self._profiles = {customer["key"]: customer for customer in self._customers}
+        self.table.set_empty_message(
+            "No customers yet." if not self._customers else "No customers match this search."
+        )
         self.table.set_rows(rows)
         self._selected = None
         self._empty_detail()
@@ -197,15 +200,20 @@ class CustomersPage(Page):
         left.grid(row=0, column=0, sticky="nsew", padx=(20, 10), pady=18)
         head = ctk.CTkFrame(left, fg_color="transparent")
         head.pack(fill="x")
-        body(head, customer["name"], size=14, weight="bold").pack(side="left")
+        body(head, theme.truncate(customer["name"], 46), size=14, weight="bold").pack(
+            side="left"
+        )
         Pill(
             head,
             customer["segment"],
             tone=SEGMENT_TONES.get(customer["segment"], (theme.PAPER_DEEP, theme.INK_SOFT)),
         ).pack(side="left", padx=(8, 0))
-        muted(left, customer["email"] or "No email on file", size=9).pack(
-            anchor="w", pady=(2, 10)
-        )
+        muted(
+            left,
+            customer["email"] or "No email on file",
+            size=9,
+            wraplength=420,
+        ).pack(anchor="w", pady=(2, 10))
 
         body(left, "Recent orders", size=10, weight="bold").pack(anchor="w", pady=(2, 4))
         recent = customer["recent_orders"]

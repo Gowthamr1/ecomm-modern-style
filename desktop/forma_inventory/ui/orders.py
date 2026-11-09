@@ -173,6 +173,9 @@ class OrdersPage(Page):
                 }
             )
         self._order_map = {str(order.get("_id")): order for order in self._orders}
+        self.table.set_empty_message(
+            "No orders yet." if not self._orders else "No orders match this filter."
+        )
         self.table.set_rows(rows)
         self._selected = None
         self._empty_detail()

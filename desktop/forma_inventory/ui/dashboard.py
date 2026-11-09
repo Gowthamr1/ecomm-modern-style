@@ -211,7 +211,7 @@ class DashboardPage(Page):
         for child in self.sellers_host.winfo_children():
             child.destroy()
         top = analytics["top_products"][:5]
-        self.sellers_note.configure(text=f"By revenue · last {analytics['days']} days")
+        self.sellers_note.configure(text=f"Last {analytics['days']} days")
         if not top:
             muted(self.sellers_host, "No product sales in this period yet.", size=10).pack(
                 anchor="w", pady=10
@@ -230,7 +230,9 @@ class DashboardPage(Page):
             ).pack(side="left")
             copy = ctk.CTkFrame(line, fg_color="transparent")
             copy.pack(side="left", fill="x", expand=True)
-            body(copy, row["name"], size=10, weight="bold").pack(anchor="w")
+            body(copy, theme.truncate(row["name"], 34), size=10, weight="bold").pack(
+                anchor="w"
+            )
             bar = ctk.CTkFrame(
                 copy, height=4, corner_radius=2, fg_color=theme.LINE_SOFT
             )
@@ -272,7 +274,9 @@ class DashboardPage(Page):
             dot.pack(side="left", padx=(0, 8), pady=(5, 0))
             copy = ctk.CTkFrame(row, fg_color="transparent")
             copy.pack(side="left", fill="x", expand=True)
-            body(copy, product["name"], size=10, weight="bold").pack(anchor="w")
+            body(copy, theme.truncate(product["name"], 30), size=10, weight="bold").pack(
+                anchor="w"
+            )
             muted(
                 copy,
                 "Out of stock"

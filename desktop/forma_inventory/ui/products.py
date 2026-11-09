@@ -226,6 +226,11 @@ class ProductsPage(Page):
                 }
             )
         self._rows_by_id = {row["iid"]: row["product"] for row in rows}
+        self.table.set_empty_message(
+            "No products yet — add your first product."
+            if not self._products
+            else "No products match this search."
+        )
         self.table.set_rows(
             [
                 {
@@ -239,7 +244,13 @@ class ProductsPage(Page):
         self._selected = None
         self._update_actions()
         if not rows:
-            self.selection_note.configure(text="No products match this search.")
+            self.selection_note.configure(
+                text=(
+                    "No products in the catalog yet."
+                    if not self._products
+                    else "No products match this search."
+                )
+            )
         else:
             self.selection_note.configure(
                 text=f"{len(rows)} shown · double-click a row to edit"

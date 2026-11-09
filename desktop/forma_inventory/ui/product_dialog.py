@@ -213,10 +213,10 @@ class ProductDialog(ctk.CTkToplevel):
             "material": product.get("material", ""),
             "price": _rupees(product.get("price")),
             "compare": _rupees(product.get("compareAtPrice")),
-            "cost": _rupees(
-                product.get("cost")
+            "cost": (
+                _rupees(product.get("cost"), blank_zero=False)
                 if product.get("cost") is not None
-                else int(product.get("price", 0) * 0.55)
+                else _rupees(int(product.get("price", 0) * 0.55))
             ),
             "stock": str(product.get("stock", 0)),
             "reorder": str(product.get("reorderLevel", 5)),
@@ -306,7 +306,10 @@ class ProductDialog(ctk.CTkToplevel):
             if not self.winfo_exists():
                 return
             self._saving = False
-            self.grab_release()
+            try:
+                self.grab_release()
+            except tk.TclError:
+                pass
             self.destroy()
             self.app.refresh()
 
@@ -330,8 +333,12 @@ class ProductDialog(ctk.CTkToplevel):
             raise ValueError("Price must be greater than zero.")
         compare_text = self.fields["compare"].get().strip()
         compare = parse_inr(compare_text) if compare_text else None
+        if compare is not None and compare < 0:
+            raise ValueError("Compare-at price cannot be negative.")
         cost_text = self.fields["cost"].get().strip()
         cost = parse_inr(cost_text) if cost_text else int(price * 0.55)
+        if cost < 0:
+            raise ValueError("Unit cost cannot be negative.")
         stock = _non_negative_int(self.fields["stock"].get(), "Stock")
         reorder = _non_negative_int(self.fields["reorder"].get(), "Reorder level")
         image = self.fields["image"].get().strip() or FALLBACK_IMAGE
@@ -382,12 +389,12 @@ class ProductDialog(ctk.CTkToplevel):
             pass
 
 
-def _rupees(paise: Any) -> str:
+def _rupees(paise: Any, *, blank_zero: bool = True) -> str:
     try:
         value = int(paise or 0) / 100
     except (TypeError, ValueError):
         return ""
-    if value == 0:
+    if value == 0 and blank_zero:
         return ""
     text = f"{value:.2f}"
     return text.rstrip("0").rstrip(".")

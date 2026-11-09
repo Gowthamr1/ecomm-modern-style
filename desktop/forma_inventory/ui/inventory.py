@@ -199,6 +199,11 @@ class InventoryPage(Page):
         self._rows_by_id = {
             str(product.get("_id")): product for product in self._products
         }
+        self.table.set_empty_message(
+            "No products in inventory yet."
+            if not self._products
+            else "No stock matches this filter."
+        )
         self.table.set_rows(rows)
         self._selected = None
         self._update_actions()
@@ -268,7 +273,7 @@ class StockDialog(ctk.CTkToplevel):
         )
         body(
             wrap,
-            f"Set stock for {self.product.get('name', 'this product')}",
+            f"Set stock for {theme.truncate(self.product.get('name', 'this product'), 34)}",
             size=13,
             weight="bold",
         ).grid(row=1, column=0, sticky="w", padx=18, pady=(4, 0))
@@ -295,6 +300,8 @@ class StockDialog(ctk.CTkToplevel):
             text_color=theme.RED,
             font=font(9),
             anchor="w",
+            justify="left",
+            wraplength=320,
         )
         self.error.grid(row=4, column=0, sticky="w", padx=18, pady=(4, 0))
         buttons = ctk.CTkFrame(wrap, fg_color="transparent")
@@ -341,7 +348,10 @@ class StockDialog(ctk.CTkToplevel):
 
         def done(_value: Any) -> None:
             if self.winfo_exists():
-                self.grab_release()
+                try:
+                    self.grab_release()
+                except tk.TclError:
+                    pass
                 self.destroy()
                 self.app.refresh()
 
@@ -361,7 +371,10 @@ class StockDialog(ctk.CTkToplevel):
         x = root.winfo_rootx() + (root.winfo_width() - self.winfo_width()) // 2
         y = root.winfo_rooty() + (root.winfo_height() - self.winfo_height()) // 2
         self.geometry(f"+{max(0, x)}+{max(0, y)}")
-        self.grab_set()
+        try:
+            self.grab_set()
+        except tk.TclError:
+            pass
 
 
 def _int(value: Any, fallback: int = 0) -> int:

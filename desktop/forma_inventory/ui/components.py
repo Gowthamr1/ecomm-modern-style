@@ -170,10 +170,12 @@ class DataTable(ctk.CTkFrame):
     ) -> None:
         super().__init__(master, fg_color=theme.CARD, corner_radius=12)
         self._columns = columns
+        self._keys = [column[0] for column in columns]
         self._on_select = on_select
         self._on_double_click = on_double_click
         self._empty_message = empty_message
         self._rows: list[dict[str, Any]] = []
+        self._horizontal_scroll_visible = False
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -205,7 +207,21 @@ class DataTable(ctk.CTkFrame):
             style="Forma.Vertical.TScrollbar",
         )
         scrollbar.grid(row=0, column=1, sticky="ns", pady=6, padx=(0, 4))
-        self.tree.configure(yscrollcommand=scrollbar.set)
+        self._horizontal_scrollbar = ttk.Scrollbar(
+            self,
+            orient="horizontal",
+            command=self.tree.xview,
+            style="Forma.Horizontal.TScrollbar",
+        )
+        self._horizontal_scrollbar.grid(
+            row=1, column=0, sticky="ew", padx=(6, 0), pady=(0, 4)
+        )
+        self._horizontal_scrollbar.grid_remove()
+        self.tree.configure(
+            yscrollcommand=scrollbar.set,
+            xscrollcommand=self._horizontal_scrollbar.set,
+        )
+        self.tree.bind("<Configure>", self._sync_horizontal_scroll, add="+")
 
         self.tree.tag_configure("low", foreground=theme.AMBER)
         self.tree.tag_configure("out", foreground=theme.RED)
@@ -223,6 +239,11 @@ class DataTable(ctk.CTkFrame):
         )
         self.empty_label.grid(row=0, column=0, sticky="nsew")
         self.empty_label.lift()
+
+    def set_empty_message(self, text: str) -> None:
+        self._empty_message = text
+        if not self._rows:
+            self.empty_label.configure(text=text)
 
     def set_rows(self, rows: Iterable[dict[str, Any]]) -> None:
         selected = self.selected_key()
@@ -245,6 +266,20 @@ class DataTable(ctk.CTkFrame):
             self.empty_label.lower()
         else:
             self.empty_label.lift()
+
+    def _sync_horizontal_scroll(self, _event: tk.Event | None = None) -> None:
+        if not self.winfo_exists():
+            return
+        content_width = sum(
+            int(self.tree.column(key, "width")) for key in self._keys
+        )
+        needs_scroll = content_width > self.tree.winfo_width() + 2
+        if needs_scroll and not self._horizontal_scroll_visible:
+            self._horizontal_scrollbar.grid()
+            self._horizontal_scroll_visible = True
+        elif not needs_scroll and self._horizontal_scroll_visible:
+            self._horizontal_scrollbar.grid_remove()
+            self._horizontal_scroll_visible = False
 
     def selected_key(self) -> str | None:
         selection = self.tree.selection()
