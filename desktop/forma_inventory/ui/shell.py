@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import tkinter as tk
-from datetime import datetime
-from tkinter import messagebox
+from datetime import date, datetime
+from tkinter import filedialog, messagebox
 from typing import Any, Callable
 
 import customtkinter as ctk
@@ -10,8 +10,10 @@ import customtkinter as ctk
 from .. import theme
 from ..analytics import build_analytics
 from ..api import AdminRequired, AdminSession, ConvexError
+from ..export import export_customers, export_inventory, export_orders, export_products
 from .analytics_view import AnalyticsPage
 from .components import body, display_font, font, initials, muted
+from .customers import CustomersPage
 from .dashboard import DashboardPage
 from .inventory import InventoryPage, StockDialog
 from .orders import OrdersPage
@@ -22,7 +24,8 @@ NAV = [
     ("products", "Products", "02"),
     ("inventory", "Inventory", "03"),
     ("orders", "Orders", "04"),
-    ("analytics", "Analytics", "05"),
+    ("customers", "Customers", "05"),
+    ("analytics", "Analytics", "06"),
 ]
 
 
@@ -43,7 +46,9 @@ class ShellView(ctk.CTkFrame):
         self._refreshing = False
         self._auto_job: str | None = None
         self._nav_buttons: dict[str, ctk.CTkButton] = {}
+        self._page_types: dict[str, Any] = {}
         self._pages: dict[str, Any] = {}
+        self._dirty_pages: set[str] = set()
         self._active = "dashboard"
 
         self.grid_rowconfigure(0, weight=1)
@@ -194,6 +199,22 @@ class ShellView(ctk.CTkFrame):
         self.page_title.grid(row=0, column=0, sticky="w")
         self.refresh_state = muted(topbar, "Connecting…", size=9)
         self.refresh_state.grid(row=0, column=1, sticky="e", padx=(0, 12))
+        self.export_button = ctk.CTkButton(
+            topbar,
+            text="Export CSV",
+            width=94,
+            height=30,
+            corner_radius=15,
+            fg_color=theme.PAPER_DEEP,
+            border_width=1,
+            border_color=theme.LINE,
+            hover_color=theme.SAND,
+            text_color=theme.INK_SOFT,
+            font=font(8, "bold"),
+            command=self.export_active,
+            state="disabled",
+        )
+        self.export_button.grid(row=0, column=2, sticky="e", padx=(0, 8))
         self.refresh_button = ctk.CTkButton(
             topbar,
             text="Refresh",
@@ -208,7 +229,7 @@ class ShellView(ctk.CTkFrame):
             font=font(8, "bold"),
             command=self.refresh,
         )
-        self.refresh_button.grid(row=0, column=2, sticky="e")
+        self.refresh_button.grid(row=0, column=3, sticky="e")
 
         self.page_host = ctk.CTkFrame(content, fg_color=theme.PAPER, corner_radius=0)
         self.page_host.grid(row=1, column=0, sticky="nsew")
@@ -216,25 +237,38 @@ class ShellView(ctk.CTkFrame):
         self.page_host.grid_columnconfigure(0, weight=1)
 
     def _build_pages(self) -> None:
-        page_types = {
+        self._page_types = {
             "dashboard": DashboardPage,
             "products": ProductsPage,
             "inventory": InventoryPage,
             "orders": OrdersPage,
+            "customers": CustomersPage,
             "analytics": AnalyticsPage,
         }
-        for key, page_type in page_types.items():
-            page = page_type(self.page_host, self)
-            page.grid(row=0, column=0, sticky="nsew")
-            self._pages[key] = page
+
+    def _ensure_page(self, key: str) -> Any | None:
+        page = self._pages.get(key)
+        if page is not None:
+            return page
+        page_type = self._page_types.get(key)
+        if page_type is None:
+            return None
+        page = page_type(self.page_host, self)
+        page.grid(row=0, column=0, sticky="nsew")
+        self._pages[key] = page
+        if self.analytics is not None:
+            self._dirty_pages.add(key)
+        return page
 
     # ------------------------------------------------------------------ nav
     def show_page(self, key: str) -> None:
-        if key not in self._pages:
+        page = self._ensure_page(key)
+        if page is None:
             return
         self._active = key
-        self._pages[key].tkraise()
-        page = self._pages[key]
+        if key in self._dirty_pages:
+            self._render_active_page()
+        page.raise_page()
         page.on_show()
         self.page_title.configure(text=dict((item[0], item[1]) for item in NAV).get(key, key))
         for name, button in self._nav_buttons.items():
@@ -258,8 +292,9 @@ class ShellView(ctk.CTkFrame):
                 return
             self.snapshot = snapshot
             self.analytics = build_analytics(snapshot, self.days)
-            for page in self._pages.values():
-                page.update_data(self.analytics, snapshot)
+            self._dirty_pages.update(self._page_types)
+            self._render_active_page()
+            self.export_button.configure(state="normal")
             self.refresh_button.configure(state="normal", text="Refresh")
             self.refresh_state.configure(
                 text=f"Updated {datetime.now().strftime('%H:%M')}",
@@ -287,22 +322,79 @@ class ShellView(ctk.CTkFrame):
 
         self.app.run_async(self.session.snapshot, on_success=done, on_error=failed)
 
+    def _render_active_page(self) -> None:
+        page = self._pages.get(self._active)
+        if page is None or self.analytics is None or self.snapshot is None:
+            return
+        page.update_data(self.analytics, self.snapshot)
+        self._dirty_pages.discard(self._active)
+
     def _schedule_auto_refresh(self) -> None:
         if self._auto_job is not None:
             try:
                 self.after_cancel(self._auto_job)
             except tk.TclError:
                 pass
-        self._auto_job = self.after(120_000, self.refresh)
+        self._auto_job = self.after(180_000, self.refresh)
 
     def set_range(self, days: int) -> None:
         self.days = days
         if self.snapshot:
             self.analytics = build_analytics(self.snapshot, days)
-            for page in self._pages.values():
-                page.update_data(self.analytics, self.snapshot)
+            self._dirty_pages.update(self._page_types)
+            self._render_active_page()
         else:
             self.refresh()
+
+    # ------------------------------------------------------------------ export
+    def export_active(self) -> None:
+        if not self.snapshot or not self.analytics:
+            messagebox.showinfo(
+                "Nothing to export yet",
+                "Let the store data load, then try again.",
+                parent=self,
+            )
+            return
+
+        kind = (
+            self._active
+            if self._active in {"products", "inventory", "orders", "customers"}
+            else "orders"
+        )
+        labels = {
+            "products": "Products",
+            "inventory": "Inventory",
+            "orders": "Orders",
+            "customers": "Customers",
+        }
+        filename = filedialog.asksaveasfilename(
+            parent=self,
+            title=f"Export {labels[kind].lower()} as CSV",
+            initialfile=f"forma-{kind}-{date.today().isoformat()}.csv",
+            defaultextension=".csv",
+            filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
+        )
+        if not filename:
+            return
+        writers = {
+            "products": export_products,
+            "inventory": export_inventory,
+            "orders": export_orders,
+            "customers": export_customers,
+        }
+        try:
+            writers[kind](filename, self.snapshot, self.analytics)
+        except OSError as error:
+            messagebox.showerror(
+                "Could not export",
+                f"The CSV could not be written.\n\n{error}",
+                parent=self,
+            )
+            return
+        self.refresh_state.configure(
+            text=f"Exported {labels[kind].lower()} CSV",
+            text_color=theme.GREEN,
+        )
 
     # ------------------------------------------------------------------ actions
     def run_mutation(

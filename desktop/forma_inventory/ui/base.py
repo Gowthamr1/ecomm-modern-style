@@ -22,5 +22,9 @@ class Page(ctk.CTkScrollableFrame):
     def update_data(self, analytics: dict[str, Any], snapshot: dict[str, Any]) -> None:
         """Refresh the view. Called on the Tk main thread."""
 
+    def raise_page(self) -> None:
+        """Bring this page's scroll container above the other pages."""
+        self._parent_frame.tkraise()
+
     def on_show(self) -> None:
         """Called when the page becomes visible."""

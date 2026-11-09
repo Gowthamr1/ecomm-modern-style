@@ -19,6 +19,7 @@ class OrdersPage(Page):
         self._orders: list[dict[str, Any]] = []
         self._selected: dict[str, Any] | None = None
         self._filter = tk.StringVar(value="All")
+        self._query = tk.StringVar()
         self._build()
 
     def _build(self) -> None:
@@ -39,6 +40,18 @@ class OrdersPage(Page):
         tools = ctk.CTkFrame(self, fg_color="transparent")
         tools.pack(fill="x", padx=30, pady=(18, 0))
         tools.grid_columnconfigure(0, weight=1)
+        self.search = ctk.CTkEntry(
+            tools,
+            height=38,
+            corner_radius=10,
+            border_color=theme.LINE,
+            fg_color=theme.CARD,
+            placeholder_text="Search order number, customer or email…",
+            font=font(10),
+            textvariable=self._query,
+        )
+        self.search.grid(row=0, column=0, sticky="ew", padx=(0, 10))
+        self.search.bind("<KeyRelease>", lambda _event: self._render())
         self.filter = ctk.CTkSegmentedButton(
             tools,
             values=["All", "Paid", "Shipped", "Delivered", "Cancelled"],
@@ -53,9 +66,9 @@ class OrdersPage(Page):
             font=font(9),
             height=34,
         )
-        self.filter.grid(row=0, column=0, sticky="w")
+        self.filter.grid(row=0, column=1, sticky="e")
         self.count_note = muted(tools, "", size=9)
-        self.count_note.grid(row=0, column=1, sticky="e")
+        self.count_note.grid(row=0, column=2, sticky="e", padx=(12, 0))
 
         table_card = ctk.CTkFrame(
             self,
@@ -113,6 +126,7 @@ class OrdersPage(Page):
 
     def _render(self) -> None:
         mode = self._filter.get().lower()
+        query = self._query.get().strip().lower()
         rows = []
         for order in self._orders:
             status = str(order.get("status", "paid"))
@@ -120,6 +134,19 @@ class OrdersPage(Page):
                 continue
             payment = order.get("payment") or {}
             customer = order.get("customer") or {}
+            address = order.get("shippingAddress") or {}
+            haystack = " ".join(
+                str(value or "")
+                for value in (
+                    order.get("number"),
+                    customer.get("name"),
+                    customer.get("email"),
+                    address.get("city"),
+                    address.get("region"),
+                )
+            ).lower()
+            if query and query not in haystack:
+                continue
             created = _int(order.get("createdAt"))
             tag = (
                 "low"
@@ -149,7 +176,8 @@ class OrdersPage(Page):
         self.table.set_rows(rows)
         self._selected = None
         self._empty_detail()
-        self.count_note.configure(text=f"{len(rows)} orders shown")
+        suffix = f" of {len(self._orders)}" if self._orders else ""
+        self.count_note.configure(text=f"{len(rows)}{suffix} orders shown")
 
     def _on_select(self, row: dict[str, str] | None) -> None:
         order = self._order_map.get(row["_iid"]) if row else None

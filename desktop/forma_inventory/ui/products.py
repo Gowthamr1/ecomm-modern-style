@@ -123,6 +123,10 @@ class ProductsPage(Page):
             actions, "Edit", theme.PAPER_DEEP, theme.INK_SOFT, self.open_edit
         )
         self.edit_button.pack(side="right", padx=(8, 0))
+        self.duplicate_button = self._small_button(
+            actions, "Duplicate", theme.PAPER_DEEP, theme.INK_SOFT, self.duplicate_selected
+        )
+        self.duplicate_button.pack(side="right", padx=(8, 0))
         self.restock_button = self._small_button(
             actions,
             "Restock +5",
@@ -131,7 +135,12 @@ class ProductsPage(Page):
             self.restock_selected,
         )
         self.restock_button.pack(side="right")
-        for button in (self.edit_button, self.delete_button, self.restock_button):
+        for button in (
+            self.edit_button,
+            self.duplicate_button,
+            self.delete_button,
+            self.restock_button,
+        ):
             button.configure(state="disabled")
 
     def _small_button(
@@ -245,7 +254,12 @@ class ProductsPage(Page):
 
     def _update_actions(self) -> None:
         state = "normal" if self._selected else "disabled"
-        for button in (self.edit_button, self.delete_button, self.restock_button):
+        for button in (
+            self.edit_button,
+            self.duplicate_button,
+            self.delete_button,
+            self.restock_button,
+        ):
             button.configure(state=state)
 
     def open_add(self) -> None:
@@ -282,6 +296,31 @@ class ProductsPage(Page):
         payload = product_payload(product, stock=_int(product.get("stock")) + 5)
         self.app.run_mutation(
             "products:update",
+            payload,
+            on_success=lambda _value: self.app.refresh(),
+            on_error=self._action_error,
+        )
+
+    def duplicate_selected(self) -> None:
+        product = self._selected
+        if not product:
+            return
+        existing = {str(item.get("name", "")).lower() for item in self._products}
+        base = f"{product.get('name', 'Product')} copy"
+        name = base
+        suffix = 2
+        while name.lower() in existing:
+            name = f"{base} {suffix}"
+            suffix += 1
+        payload = product_payload(
+            product,
+            name=name,
+            stock=0,
+            featured=False,
+        )
+        payload.pop("productId", None)
+        self.app.run_mutation(
+            "products:create",
             payload,
             on_success=lambda _value: self.app.refresh(),
             on_error=self._action_error,

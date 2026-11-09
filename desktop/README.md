@@ -8,9 +8,11 @@ It connects to the same Convex deployment as the web and mobile apps, so product
 
 - **Admin sign-in** with the same email OTP used by the storefront. Only an account with the `admin` role can enter.
 - **Dashboard** with revenue, orders, average order value, gross margin, a revenue trend, category mix, top sellers, low-stock alerts and recent orders.
-- **Products** — add, edit, delete, change prices, costs, categories, imagery, descriptions, stock and featured placement.
+- **Products** — add, edit, duplicate, delete, change prices, costs, categories, imagery, descriptions, stock and featured placement.
 - **Inventory** — reorder levels, stock value at retail and cost, low/out-of-stock filters, quick `+5`/`+10` restocks and an exact stock editor.
-- **Orders** — filter by status, inspect line items and delivery address, mark shipped/delivered, cancel and refund (items return to stock automatically).
+- **Orders** — search by order/customer/email, filter by status, inspect line items and delivery address, mark shipped/delivered, cancel and refund (items return to stock automatically).
+- **Customers** — lifetime spend, repeat/VIP/at-risk segments, search and recent-order history derived from the live order book.
+- **CSV exports** — export the current section (products, inventory, orders or customers) from the top bar for spreadsheet work.
 - **Analytics** — 30/90/365-day revenue, category and weekday breakdowns, top-product revenue, stock value by category, gross profit, sell-through and a per-product recommendation (`Star`, `Restock`, `Slow mover`, `Thin margin`, `Clear stock`).
 - **INR pricing** throughout: prices and costs are entered in rupees, stored server-side as paise. Checkout uses ₹6,250 free-shipping threshold, ₹199 flat shipping and 18% GST.
 
@@ -70,7 +72,7 @@ To grant the role to another account, open the deployment in the Convex dashboar
 
 ## Tests
 
-The analytics and money helpers are pure Python and run without a display or network:
+The analytics, customer and CSV helpers are pure Python and run without a display or network:
 
 ```bat
 cd desktop
@@ -85,6 +87,8 @@ desktop/
   forma_inventory/
     api.py                      Convex HTTP client, email OTP, admin session
     analytics.py                INR helpers, revenue/margin/stock analysis
+    customers.py                customer segmentation and lifetime value
+    export.py                   CSV exports for the admin tables
     charts.py                   dependency-free canvas charts
     config.py                   Convex URL + local preferences
     theme.py                    Forma palette and ttk table styling
@@ -96,6 +100,7 @@ desktop/
       product_dialog.py         add/edit product modal
       inventory.py              stock control + stock dialog
       orders.py                 fulfilment and refunds
+      customers.py              customer list + lifetime value detail
       analytics_view.py         deep analytics + recommendations
   FormaInventory.spec           PyInstaller configuration
   build_windows.bat             Windows build script
