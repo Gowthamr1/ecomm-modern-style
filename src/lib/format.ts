@@ -25,9 +25,9 @@ export function initials(value?: string | null): string {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-export const FREE_SHIPPING_THRESHOLD = 625000;
-export const SHIPPING_FEE = 19900;
-export const TAX_RATE = 0.18;
+export const FREE_SHIPPING_THRESHOLD = 150000; // ₹1,500 complimentary shipping
+export const SHIPPING_FEE = 9900; // ₹99 flat pan-India shipping
+export const TAX_RATE = 0.05; // 5% GST on single-origin spices
 
 export function orderSummary(subtotal: number) {
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;

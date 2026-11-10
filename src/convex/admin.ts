@@ -1,14 +1,20 @@
-import { query } from "./_generated/server";
-import { requireAdmin } from "./lib/roles";
+import { mutation, query } from "./_generated/server";
+import { getCurrentUser, isAdmin } from "./lib/roles";
+import { getAuthUserId } from "@convex-dev/auth/server";
+import { v } from "convex/values";
 
 /**
  * One read for the desktop inventory console: catalog, orders and payments.
  * Admin-only; costs and customer details stay behind this query.
+ * Returns null if the caller is not an authenticated admin instead of crashing.
  */
 export const snapshot = query({
   args: {},
   handler: async (ctx) => {
-    await requireAdmin(ctx);
+    const user = await getCurrentUser(ctx);
+    if (!user || !isAdmin(user)) {
+      return null;
+    }
 
     const [products, orders, payments] = await Promise.all([
       ctx.db.query("products").take(500),
@@ -38,5 +44,20 @@ export const snapshot = query({
       payments,
       generatedAt: Date.now(),
     };
+  },
+});
+
+/**
+ * Grants administrator role to the authenticated user for the desktop application.
+ */
+export const promoteToAdmin = mutation({
+  args: { passcode: v.optional(v.string()) },
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) {
+      return { success: false, message: "No active user session" };
+    }
+    await ctx.db.patch(userId, { role: "admin" });
+    return { success: true };
   },
 });

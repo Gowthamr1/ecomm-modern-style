@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forma — Multi-Platform UI Architecture</title>
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #18181b;
+      --surface-elevated: #27272a;
+      --border: #3f3f46;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --primary: #3b82f6;
+      --cypress: #10b981;
+      --accent: #f59e0b;
+    }
+    body.light {
+      --bg: #faf8f4;
+      --surface: #ffffff;
+      --surface-elevated: #f4f0ea;
+      --border: #e4dec3;
+      --text: #18181b;
+      --text-muted: #71717a;
+      --primary: #20382f;
+      --cypress: #059669;
+      --accent: #d97706;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      padding: 14px 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 20;
+    }
+    .title-group h1 { font-size: 16px; font-weight: 600; }
+    .title-group p { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .controls { display: flex; gap: 8px; }
+    button {
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+    button:hover { border-color: var(--primary); }
+    #canvas-container {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+      position: relative;
+    }
+    #canvas-container:active { cursor: grabbing; }
+    svg { width: 100%; height: 100%; user-select: none; }
+    .node rect {
+      fill: var(--surface);
+      stroke: var(--border);
+      stroke-width: 1.5;
+      rx: 12;
+      transition: all 0.2s ease;
+    }
+    .node:hover rect {
+      stroke: var(--primary);
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.25));
+    }
+    .node text.tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      fill: var(--cypress);
+    }
+    .node text.title {
+      font-size: 13px;
+      font-weight: 600;
+      fill: var(--text);
+    }
+    .node text.desc {
+      font-size: 11px;
+      fill: var(--text-muted);
+    }
+    .edge path {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 1.5;
+      stroke-dasharray: 4 2;
+      transition: stroke 0.2s;
+    }
+    .edge:hover path {
+      stroke: var(--primary);
+      stroke-width: 2.5;
+      stroke-dasharray: none;
+    }
+    .group-box {
+      fill: rgba(255, 255, 255, 0.02);
+      stroke: var(--border);
+      stroke-width: 1;
+      stroke-dasharray: 6 4;
+      rx: 16;
+    }
+    .group-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      fill: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title-group">
+      <h1>Forma — Multi-Platform UI Architecture</h1>
+      <p>Interactive System Model: Android App (PWA) · Modern Web · Windows Desktop</p>
+    </div>
+    <div class="controls">
+      <button onclick="zoom(0.15)">Zoom In (+)</button>
+      <button onclick="zoom(-0.15)">Zoom Out (-)</button>
+      <button onclick="resetZoom()">Reset</button>
+      <button onclick="toggleTheme()">Toggle Theme</button>
+    </div>
+  </div>
+
+  <div id="canvas-container">
+    <svg id="diagram-svg" viewBox="0 0 1000 650">
+      <g id="viewport">
+        <!-- Root Shared App Shell -->
+        <g class="node" transform="translate(380, 40)">
+          <rect width="240" height="70" />
+          <text x="20" y="24" class="tag">Foundation</text>
+          <text x="20" y="44" class="title">SiteShell.tsx</text>
+          <text x="20" y="58" class="desc">Global State, Shortcuts & Modals</text>
+        </g>
+
+        <!-- Windows & Desktop Group -->
+        <rect x="50" y="160" width="260" height="420" class="group-box" />
+        <text x="70" y="190" class="group-label">Windows App / Desktop</text>
+
+        <g class="node" transform="translate(70, 220)">
+          <rect width="220" height="70" />
+          <text x="16" y="24" class="tag">Top Navigation</text>
+          <text x="16" y="44" class="title">WindowsDesktopBar</text>
+          <text x="16" y="58" class="desc">Cloud status & Ctrl+K hints</text>
+        </g>
+
+        <g class="node" transform="translate(70, 320)">
+          <rect width="220" height="70" />
+          <text x="16" y="24" class="tag">Power Workflow</text>
+          <text x="16" y="44" class="title">QuickSearchModal</text>
+          <text x="16" y="58" class="desc">Instant catalog keyboard search</text>
+        </g>
+
+        <g class="node" transform="translate(70, 420)">
+          <rect width="220" height="70" />
+          <text x="16" y="24" class="tag">Density Mode</text>
+          <text x="16" y="44" class="title">Editorial vs Compact</text>
+          <text x="16" y="58" class="desc">High data density for 4K / wide</text>
+        </g>
+
+        <!-- Core Web Storefront Group -->
+        <rect x="370" y="160" width="260" height="420" class="group-box" />
+        <text x="390" y="190" class="group-label">Responsive Web Core</text>
+
+        <g class="node" transform="translate(390, 220)">
+          <rect width="220" height="70" />
+          <text x="16" y="24" class="tag">Editorial Brand</text>
+          <text x="16" y="44" class="title">SiteHeader & Brand</text>
+          <text x="16" y="58" class="desc">Sticky glass blur navigation</text>
+        </g>
+
+        <g class="node" transform="translate(390, 320)">
+          <rect width="220" height="70" />
+          <text x="16" y="24" class="tag">Catalog Grid</text>
+          <text x="16" y="44" class="title">Shop.tsx (Filters & Sort)</text>
+          <text x="16" y="58" class="desc">Live Convex reactivity</text>
+        </g>
+
+        <g class="node" transform="translate(390, 420)">
+          <rect width="220" height="70" />
+          <text x="16" y="24" class="tag">Item View</text>
+          <text x="16" y="44" class="title">Product.tsx</text>
+          <text x="16" y="58" class="desc">High-res gallery & spec tables</text>
+        </g>
+
+        <!-- Android Mobile Group -->
+        <rect x="690" y="160" width="260" height="420" class="group-box" />
+        <text x="710" y="190" class="group-label">Android App / Mobile</text>
+
+        <g class="node" transform="translate(710, 220)">
+          <rect width="220" height="70" />
+          <text x="16" y="24" class="tag">Native PWA</text>
+          <text x="16" y="44" class="title">PwaInstallBanner</text>
+          <text x="16" y="58" class="desc">1-Tap home screen installation</text>
+        </g>
+
+        <g class="node" transform="translate(710, 320)">
+          <rect width="220" height="70" />
+          <text x="16" y="24" class="tag">One-Thumb Nav</text>
+          <text x="16" y="44" class="title">MobileBottomNav</text>
+          <text x="16" y="58" class="desc">5-Tab bar with animated bag badge</text>
+        </g>
+
+        <g class="node" transform="translate(710, 420)">
+          <rect width="220" height="70" />
+          <text x="16" y="24" class="tag">Sticky Action</text>
+          <text x="16" y="44" class="title">Mobile Action Bar</text>
+          <text x="16" y="58" class="desc">Fixed Add-to-Bag above nav bar</text>
+        </g>
+
+        <!-- Connecting Orthogonal Lines -->
+        <g class="edge">
+          <path d="M 440 110 L 440 135 L 180 135 L 180 220" />
+        </g>
+        <g class="edge">
+          <path d="M 500 110 L 500 220" />
+        </g>
+        <g class="edge">
+          <path d="M 560 110 L 560 135 L 820 135 L 820 220" />
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <script>
+    let scale = 1, panX = 0, panY = 0, isPanning = false, startX = 0, startY = 0;
+    const viewport = document.getElementById("viewport");
+    const container = document.getElementById("canvas-container");
+
+    function updateTransform() {
+      viewport.setAttribute("transform", `translate(${panX}, ${panY}) scale(${scale})`);
+    }
+
+    container.addEventListener("mousedown", (e) => {
+      isPanning = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isPanning) return;
+      panX = e.clientX - startX;
+      panY = e.clientY - startY;
+      updateTransform();
+    });
+
+    window.addEventListener("mouseup", () => isPanning = false);
+    container.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+      scale = Math.min(Math.max(0.4, scale * zoomFactor), 2.5);
+      updateTransform();
+    });
+
+    function zoom(delta) { scale = Math.min(Math.max(0.4, scale + delta), 2.5); updateTransform(); }
+    function resetZoom() { scale = 1; panX = 0; panY = 0; updateTransform(); }
+    function toggleTheme() { document.body.classList.toggle("light"); }
+  </script>
+</body>
+</html>

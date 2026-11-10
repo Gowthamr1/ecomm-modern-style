@@ -1,17 +1,33 @@
 {
-  "name": "Forma — Everyday objects, considered",
-  "short_name": "Forma",
-  "description": "A demo storefront for considered everyday objects, with demo payments and role-based admin tools.",
+  "name": "Forma Spices — Single-Origin Indian Spices",
+  "short_name": "Forma Spices",
+  "description": "Artisanal single-origin Indian spices from Idukki green cardamom to Kashmiri Mongra saffron.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#faf8f4",
-  "theme_color": "#20382f",
+  "theme_color": "#1b382b",
   "icons": [
     {
       "src": "/logo.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Spices Inventory Console",
+      "short_name": "Inventory",
+      "description": "Open Forma Spices stock control and harvest telemetry",
+      "url": "/inventory",
+      "icons": [{ "src": "/logo.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Spices Catalog & Shop",
+      "short_name": "Shop",
+      "description": "Browse single-origin Indian heirloom spices",
+      "url": "/shop",
+      "icons": [{ "src": "/logo.svg", "sizes": "any" }]
     }
   ]
 }

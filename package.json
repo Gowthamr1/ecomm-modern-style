@@ -6,11 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "desktop": "start msedge --app=http://localhost:5173/inventory",
+    "desktop:chrome": "start chrome --app=http://localhost:5173/inventory",
+    "electron:dev": "electron electron/main.cjs",
     "lint": "eslint .",
     "format": "prettier --write .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@auth/core": "^0.37.4",
     "@convex-dev/auth": "^0.0.90",
     "@hookform/resolvers": "^5.2.2",
     "@jridgewell/trace-mapping": "^0.3.31",

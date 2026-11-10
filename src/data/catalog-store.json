@@ -1,0 +1,25 @@
+{
+  "customProducts": [
+    {
+      "_id": "spice_custom_1794230248493",
+      "_creationTime": 1794230248493,
+      "name": "mustard seed",
+      "slug": "mustard-seed",
+      "category": "Whole Pods & Seeds",
+      "tagline": "Single-origin plantation harvest",
+      "description": "Sun-dried whole spice harvested directly from family plantation.",
+      "price": 80000,
+      "cost": 32000,
+      "weight": "10 kg",
+      "stock": 80,
+      "reorderLevel": 10,
+      "image": "https://cookingmasala.com/wp-content/uploads/2024/08/IMG_1412-2.jpg",
+      "material": "Idukki, Kerala · Grade AGEB",
+      "rating": 4.9,
+      "reviewCount": 1,
+      "featured": true
+    }
+  ],
+  "overrides": {},
+  "deletedIds": []
+}

@@ -2,6 +2,7 @@ import '@vly-ai/integrations';
 import { Toaster } from "@/components/ui/sonner";
 import { RequireAuth } from "@/components/RequireAuth";
 import { CartProvider } from "@/lib/cart";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { VlyToolbar } from "../vly-toolbar-readonly.tsx";
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
@@ -20,13 +21,16 @@ const Checkout = lazy(() => import("./pages/Checkout.tsx"));
 const Orders = lazy(() => import("./pages/Orders.tsx"));
 const Payments = lazy(() => import("./pages/Payments.tsx"));
 const Profile = lazy(() => import("./pages/Profile.tsx"));
+const InventoryConsole = lazy(() => import("./pages/InventoryConsole.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 // Simple loading fallback for route transitions
 function RouteLoading() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-pulse text-muted-foreground">Loading...</div>
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="animate-pulse text-muted-foreground font-mono text-xs">
+        Loading Forma Studio...
+      </div>
     </div>
   );
 }
@@ -89,8 +93,6 @@ class RootErrorBoundary extends React.Component<
 
 const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
-
-
 function RouteSyncer() {
   const location = useLocation();
   useEffect(() => {
@@ -114,66 +116,70 @@ function RouteSyncer() {
   return null;
 }
 
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <RootErrorBoundary>
       <ToolbarErrorBoundary>
         <VlyToolbar />
       </ToolbarErrorBoundary>
-      <ConvexAuthProvider client={convex}>
-        <CartProvider>
-          <BrowserRouter>
-            <RouteSyncer />
-            <Suspense fallback={<RouteLoading />}>
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/shop" element={<Shop />} />
-                <Route path="/product/:slug" element={<Product />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route
-                  path="/auth"
-                  element={<AuthPage redirectAfterAuth="/shop" />}
-                />
-                <Route
-                  path="/checkout"
-                  element={
-                    <RequireAuth redirectImmediately>
-                      <Checkout />
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/orders"
-                  element={
-                    <RequireAuth redirectImmediately>
-                      <Orders />
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/payments"
-                  element={
-                    <RequireAuth redirectImmediately>
-                      <Payments />
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/profile"
-                  element={
-                    <RequireAuth redirectImmediately>
-                      <Profile />
-                    </RequireAuth>
-                  }
-                />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
-          </BrowserRouter>
-          <Toaster />
-        </CartProvider>
-      </ConvexAuthProvider>
+      <ThemeProvider>
+        <ConvexAuthProvider client={convex}>
+          <CartProvider>
+            <BrowserRouter>
+              <RouteSyncer />
+              <Suspense fallback={<RouteLoading />}>
+                <Routes>
+                  <Route path="/" element={<Landing />} />
+                  <Route path="/shop" element={<Shop />} />
+                  <Route path="/product/:slug" element={<Product />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route
+                    path="/auth"
+                    element={<AuthPage redirectAfterAuth="/shop" />}
+                  />
+                  <Route
+                    path="/checkout"
+                    element={
+                      <RequireAuth redirectImmediately>
+                        <Checkout />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    path="/orders"
+                    element={
+                      <RequireAuth redirectImmediately>
+                        <Orders />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    path="/payments"
+                    element={
+                      <RequireAuth redirectImmediately>
+                        <Payments />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <RequireAuth redirectImmediately>
+                        <Profile />
+                      </RequireAuth>
+                    }
+                  />
+                  <Route path="/inventory" element={<InventoryConsole />} />
+                  <Route path="/admin" element={<InventoryConsole />} />
+                  <Route path="/console" element={<InventoryConsole />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </BrowserRouter>
+            <Toaster />
+          </CartProvider>
+        </ConvexAuthProvider>
+      </ThemeProvider>
     </RootErrorBoundary>
   </StrictMode>,
 );

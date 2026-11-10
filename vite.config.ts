@@ -1,12 +1,124 @@
 import { vlyPlugin } from "@vly-ai/integrations";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import { defineConfig } from "vite";
+
+/**
+ * Local filesystem persistence middleware for single-origin Indian spices catalog.
+ * Synchronizes custom products, edits, stock updates, and deletions across
+ * Windows desktop app (Edge / Electron), browser website (Chrome), and local disks.
+ */
+function catalogStoragePlugin() {
+  const storeFilePath = path.resolve(__dirname, "src/data/catalog-store.json");
+
+  const handleApiCatalog = (req: any, res: any, next: any) => {
+    const url = req.url ? req.url.split("?")[0] : "";
+    if (url !== "/api/catalog") {
+      return next();
+    }
+
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+    if (req.method === "OPTIONS") {
+      res.statusCode = 204;
+      res.end();
+      return;
+    }
+
+    if (req.method === "GET") {
+      try {
+        if (!fs.existsSync(storeFilePath)) {
+          const dir = path.dirname(storeFilePath);
+          if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+          fs.writeFileSync(
+            storeFilePath,
+            JSON.stringify({ customProducts: [], overrides: {}, deletedIds: [] }, null, 2),
+            "utf-8",
+          );
+        }
+        const data = fs.readFileSync(storeFilePath, "utf-8");
+        res.setHeader("Content-Type", "application/json");
+        res.statusCode = 200;
+        res.end(data);
+      } catch (err: any) {
+        res.statusCode = 500;
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify({ error: err.message }));
+      }
+      return;
+    }
+
+    if (req.method === "POST") {
+      let body = "";
+      req.on("data", (chunk: any) => {
+        body += chunk;
+      });
+      req.on("end", () => {
+        try {
+          const payload = JSON.parse(body || "{}");
+          let current: { customProducts: any[]; overrides: Record<string, any>; deletedIds: string[] } = {
+            customProducts: [],
+            overrides: {},
+            deletedIds: [],
+          };
+
+          if (fs.existsSync(storeFilePath)) {
+            try {
+              current = JSON.parse(fs.readFileSync(storeFilePath, "utf-8"));
+            } catch {}
+          }
+
+          const updated = {
+            customProducts:
+              payload.customProducts !== undefined
+                ? payload.customProducts
+                : current.customProducts,
+            overrides:
+              payload.overrides !== undefined
+                ? payload.overrides
+                : current.overrides,
+            deletedIds:
+              payload.deletedIds !== undefined
+                ? payload.deletedIds
+                : current.deletedIds,
+          };
+
+          const dir = path.dirname(storeFilePath);
+          if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+          fs.writeFileSync(storeFilePath, JSON.stringify(updated, null, 2), "utf-8");
+          res.setHeader("Content-Type", "application/json");
+          res.statusCode = 200;
+          res.end(JSON.stringify({ ok: true, data: updated }));
+        } catch (err: any) {
+          res.statusCode = 500;
+          res.setHeader("Content-Type", "application/json");
+          res.end(JSON.stringify({ error: err.message }));
+        }
+      });
+      return;
+    }
+
+    next();
+  };
+
+  return {
+    name: "catalog-storage-plugin",
+    configureServer(server: any) {
+      server.middlewares.use(handleApiCatalog);
+    },
+    configurePreviewServer(server: any) {
+      server.middlewares.use(handleApiCatalog);
+    },
+  };
+}
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), vlyPlugin(), tailwindcss()],
+  plugins: [react(), vlyPlugin(), tailwindcss(), catalogStoragePlugin()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/lib/cart";
+import { cleanImageUrl, DEFAULT_SPICE_IMAGE, handleImageFallback } from "@/lib/catalog-store";
 import { formatMoney, orderSummary } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useMutation } from "convex/react";
@@ -413,8 +414,12 @@ export default function Checkout() {
               {lines.map((line) => (
                 <li key={line.productId} className="flex items-center gap-3">
                   <img
-                    src={line.image}
+                    src={cleanImageUrl(line.image) || DEFAULT_SPICE_IMAGE}
                     alt={line.name}
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      handleImageFallback(e, line.image);
+                    }}
                     className="size-14 rounded-lg object-cover"
                   />
                   <div className="min-w-0 flex-1">

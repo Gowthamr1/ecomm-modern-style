@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/lib/cart";
+import { cleanImageUrl, DEFAULT_SPICE_IMAGE, handleImageFallback } from "@/lib/catalog-store";
 import {
   FREE_SHIPPING_THRESHOLD,
   formatMoney,
@@ -23,10 +24,10 @@ export default function Cart() {
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              Bag
+              Spice Bag
             </p>
             <h1 className="mt-3 font-display text-4xl tracking-tight sm:text-[2.75rem]">
-              Your bag
+              Your selection
               {count > 0 && (
                 <span className="ml-2 align-middle text-base font-sans text-muted-foreground tabular-nums">
                   ({count})
@@ -38,7 +39,7 @@ export default function Cart() {
             to="/shop"
             className="hidden border-b border-foreground/20 pb-1 text-[12px] font-medium transition-colors hover:border-foreground sm:block"
           >
-            Continue shopping
+            Continue browsing spices
           </Link>
         </div>
 
@@ -47,14 +48,14 @@ export default function Cart() {
             <span className="flex size-14 items-center justify-center rounded-full bg-sand text-primary">
               <ShoppingBag className="size-6" strokeWidth={1.5} />
             </span>
-            <h2 className="mt-5 font-display text-3xl">Nothing in here yet.</h2>
+            <h2 className="mt-5 font-display text-3xl">Your spice bag is empty.</h2>
             <p className="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
-              Start with something small — a bottle, a pour-over set, a good pair
-              of headphones.
+              Discover peak-harvest spices — Idukki green cardamom, Kashmiri Mongra saffron,
+              or Malabar Tellicherry black pepper.
             </p>
             <Button asChild className="mt-7 rounded-full px-6">
               <Link to="/shop">
-                Browse the collection
+                Explore Single-Origin Spices
                 <ArrowRight className="ml-2 size-4" />
               </Link>
             </Button>
@@ -70,8 +71,10 @@ export default function Cart() {
                     className="shrink-0 overflow-hidden rounded-xl bg-muted"
                   >
                     <img
-                      src={line.image}
+                      src={cleanImageUrl(line.image) || DEFAULT_SPICE_IMAGE}
                       alt={line.name}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => handleImageFallback(e, line.image)}
                       className="size-24 object-cover sm:size-28"
                     />
                   </Link>
@@ -135,16 +138,16 @@ export default function Cart() {
 
             {/* Summary */}
             <aside className="rounded-2xl border hairline bg-card p-6 shadow-soft lg:sticky lg:top-32">
-              <h2 className="font-display text-2xl tracking-tight">Summary</h2>
+              <h2 className="font-display text-2xl tracking-tight">Order Summary</h2>
 
               {remaining > 0 ? (
                 <div className="mt-5 rounded-xl bg-muted/70 p-3.5">
                   <p className="text-[12px] text-muted-foreground">
                     Add{" "}
-                    <span className="font-medium text-foreground">
+                    <span className="font-semibold text-foreground">
                       {formatMoney(remaining)}
                     </span>{" "}
-                    for free shipping
+                    for complimentary express delivery
                   </p>
                   <Progress
                     value={(subtotal / FREE_SHIPPING_THRESHOLD) * 100}
@@ -152,8 +155,8 @@ export default function Cart() {
                   />
                 </div>
               ) : (
-                <p className="mt-5 inline-flex rounded-full bg-primary/10 px-3 py-1.5 text-[11px] font-medium text-primary">
-                  Free shipping unlocked
+                <p className="mt-5 inline-flex rounded-full bg-emerald-600/10 px-3 py-1.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+                  Complimentary express shipping unlocked
                 </p>
               )}
 
@@ -163,7 +166,7 @@ export default function Cart() {
                   <dd className="tabular-nums">{formatMoney(summary.subtotal)}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Shipping</dt>
+                  <dt className="text-muted-foreground">Pan-India Express</dt>
                   <dd className="tabular-nums">
                     {summary.shipping === 0
                       ? "Free"
@@ -171,16 +174,16 @@ export default function Cart() {
                   </dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Estimated tax</dt>
+                  <dt className="text-muted-foreground">5% GST (Included)</dt>
                   <dd className="tabular-nums">{formatMoney(summary.tax)}</dd>
                 </div>
                 <div className="flex justify-between border-t hairline pt-3.5 text-base font-medium">
                   <dt>Total</dt>
-                  <dd className="tabular-nums">{formatMoney(summary.total)}</dd>
+                  <dd className="tabular-nums font-semibold">{formatMoney(summary.total)}</dd>
                 </div>
               </dl>
 
-              <Button asChild className="mt-6 h-12 w-full rounded-full text-[13px]">
+              <Button asChild className="mt-6 h-12 w-full rounded-full text-[13px] bg-primary font-semibold shadow-xs">
                 <Link
                   to={
                     isAuthenticated
@@ -188,7 +191,7 @@ export default function Cart() {
                       : "/auth?returnTo=%2Fcheckout"
                   }
                 >
-                  Continue to checkout
+                  Proceed to Checkout
                   <ArrowRight className="ml-2 size-4" />
                 </Link>
               </Button>
@@ -199,7 +202,7 @@ export default function Cart() {
                 to="/shop"
                 className="mt-3 block text-center text-[12px] text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
               >
-                Continue shopping
+                Continue browsing
               </Link>
             </aside>
           </div>

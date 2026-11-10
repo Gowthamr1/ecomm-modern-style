@@ -1,25 +1,47 @@
 import { api } from "@/convex/_generated/api";
+import type { Doc } from "@/convex/_generated/dataModel";
+import { buildMergedCatalog, fetchCatalogFromServer, subscribeToCatalogChange } from "@/lib/catalog-store";
+import type { SpiceProduct } from "@/data/spices";
 import { useMutation, useQuery } from "convex/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-/**
- * The demo catalog is seeded on first load so a fresh deployment has products
- * to browse. Safe to call from more than one page — the mutation is a no-op
- * once products exist.
- */
-export function useCatalog() {
-  const products = useQuery(api.products.list);
+export function useCatalog(): (Doc<"products"> | SpiceProduct)[] {
+  const remoteProducts = useQuery(api.products.list);
   const seed = useMutation(api.products.seedDemoCatalog);
   const requested = useRef(false);
+  const [revision, setRevision] = useState(0);
 
   useEffect(() => {
-    if (products && products.length === 0 && !requested.current) {
-      requested.current = true;
-      void seed().catch((error: unknown) => {
-        console.warn("[catalog] demo seed skipped:", error);
-      });
-    }
-  }, [products, seed]);
+    // 1. Immediate pull from disk /api/catalog so custom products from Windows App show up
+    void fetchCatalogFromServer().then((changed) => {
+      if (changed) setRevision((r) => r + 1);
+    });
 
-  return products;
+    // 2. Subscribe to cross-tab and cross-window storage updates
+    const unsubscribe = subscribeToCatalogChange(() => {
+      setRevision((r) => r + 1);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (!requested.current && remoteProducts !== undefined) {
+      const hasStaleImages = remoteProducts.some(
+        (p) =>
+          !p.image ||
+          p.image.includes("photo-1599940824399-b87987ceb72a") ||
+          p.image.includes("upload.wikimedia.org"),
+      );
+      if (remoteProducts.length === 0 || hasStaleImages) {
+        requested.current = true;
+        void seed().catch((error: unknown) => {
+          console.warn("[catalog] demo sync skipped:", error);
+        });
+      }
+    }
+  }, [remoteProducts, seed]);
+
+  return useMemo(() => {
+    return buildMergedCatalog(remoteProducts);
+  }, [remoteProducts, revision]);
 }

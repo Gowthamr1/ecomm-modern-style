@@ -2,10 +2,11 @@ import { Link } from "react-router";
 import { Brand } from "./SiteHeader";
 
 const SHOP_LINKS = [
-  { to: "/shop", label: "All objects" },
-  { to: "/shop?category=Home", label: "Home" },
-  { to: "/shop?category=Technology", label: "Technology" },
-  { to: "/shop?category=Wearables", label: "Wearables" },
+  { to: "/shop", label: "All Spices" },
+  { to: "/shop?category=Whole%20Pods%20%26%20Seeds", label: "Whole Pods & Seeds" },
+  { to: "/shop?category=Rare%20Terroirs", label: "Rare Terroirs" },
+  { to: "/shop?category=Single-Origin%20Peppers", label: "Single-Origin Peppers" },
+  { to: "/shop?category=Heritage%20Blends", label: "Heritage Blends" },
 ];
 
 const ACCOUNT_LINKS = [
@@ -23,17 +24,18 @@ export function SiteFooter() {
           <div className="max-w-xs">
             <Brand />
             <p className="mt-4 text-sm leading-6 text-muted-foreground">
-              Considered everyday objects, made to be used rather than
-              displayed. Designed in small batches, shipped across India.
+              Single-origin Indian heirloom spices harvested at peak maturity from
+              biodiverse family estates across Kerala, Kashmir, Meghalaya, and
+              Rajasthan. Kiln-fresh and airtight sealed.
             </p>
             <p className="mt-6 inline-flex items-center gap-2 rounded-full border hairline px-3 py-1.5 text-[11px] text-muted-foreground">
-              <span className="size-1.5 rounded-full bg-primary" />
-              Demo checkout — nothing is charged
+              <span className="size-1.5 rounded-full bg-emerald-600" />
+              100% Single-Estate Terroir Guarantee
             </p>
           </div>
           <div>
             <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Shop
+              Collection
             </h3>
             <ul className="mt-4 space-y-3">
               {SHOP_LINKS.map((link) => (
@@ -67,20 +69,20 @@ export function SiteFooter() {
           </div>
           <div>
             <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Support
+              Heritage Care
             </h3>
             <ul className="mt-4 space-y-3 text-sm text-foreground/80">
-              <li>Shipping &amp; returns</li>
-              <li>Care guide</li>
-              <li>hello@forma.demo</li>
-              <li>Mon–Fri, 9–5 IST</li>
+              <li>Harvest &amp; Origin Certificates</li>
+              <li>Airtight Storage Guide</li>
+              <li>concierge@formaspices.com</li>
+              <li>Pan-India Express: 2–4 Business Days</li>
             </ul>
           </div>
         </div>
         <div className="mt-12 flex flex-col gap-3 border-t hairline pt-6 text-[11px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Forma Studio. A demo storefront.</p>
+          <p>© {new Date().getFullYear()} Forma Spices Estate. Pure Single-Origin Indian Spices.</p>
           <p className="uppercase tracking-[0.16em]">
-            Browse · Bag · Demo payment
+            Idukki Cardamom · Pampore Saffron · Wayanad Pepper
           </p>
         </div>
       </div>
